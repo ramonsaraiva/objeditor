@@ -27,7 +27,7 @@ bool terminal_mode = false;
 bool fps_enabled = true;
 
 string terminal_buff;
-string error_buff;
+string comp_buff;
 string objfile_buff;
 string viewmode_buff;
 string selection_buff;
@@ -45,6 +45,11 @@ unsigned int* ids;
 int glMode = GL_POLYGON;
 
 map<string, int> terminal_cmds;
+vector<string> obj_files;
+
+static GLfloat COLOR_ERROR[] = {1.0f, 0.388235f, 0.278431f};
+static GLfloat COLOR_INFO[] = {0.690196f, 0.768627f, 0.870588f};
+GLfloat* comp_color = COLOR_ERROR;
 
 bool loadOBJ(const char* s){
 	mesh = new Mesh();
@@ -126,7 +131,7 @@ void calculeFps(){
 void toggle_terminal()
 {
     terminal_mode = !terminal_mode;
-    error_buff.clear();
+    comp_buff.clear();
     terminal_buff.clear();
 }
 
@@ -189,9 +194,9 @@ void drawScene(){
 
 	if (terminal_mode)
     {
-        /* error */
-        glColor3f(1.0f, 0.388235f, 0.278431f);
-        display2d(error_buff.c_str(), 200, 28, 14, GLUT_BITMAP_HELVETICA_18);
+        /* comp */
+        glColor3fv(comp_color);
+        display2d(comp_buff.c_str(), 200, 28, 14, GLUT_BITMAP_HELVETICA_18);
 
         /* terminal prefix */
         glColor3f(0.180392f, 0.545098f, 0.341176f);
@@ -236,7 +241,8 @@ void handleTerminal()
 
     if (!(terminal_cmds.find(tokens.front()) != terminal_cmds.end()))
     {
-        error_buff = " *Command \"" + tokens.front() + "\" not found";
+        comp_color = COLOR_ERROR;
+        comp_buff = " *Command \"" + tokens.front() + "\" not found";
         return;
     }
     else
@@ -255,19 +261,22 @@ void handleTerminal()
             case CMD_OBJ_OPEN:
                 if (!(tokens.size() == 2))
                 {
-                    error_buff = "Wrong parameters. Usage: obj-open [FILE]";
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Wrong parameters. Usage: obj-open [FILE]";
                     return;
                 }
 
                 if (loadOBJ((string("obj/") + tokens.at(1)).c_str()))
                     objfile_buff = tokens.at(1);
                 else
-                    error_buff = "Object \"" + tokens.at(1) + "\" not found";
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Object \"" + tokens.at(1) + "\" not found";
                 break;
             case CMD_MODE:
                 if (!(tokens.size() == 2))
                 {
-                    error_buff = "Wrong parameters. Usage: mode (face|vertex)";
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Wrong parameters. Usage: mode (face|vertex)";
                     return;
                 }
 
@@ -277,13 +286,14 @@ void handleTerminal()
                     set_mode(MODE_VERTEX);
                 else
                 {
-                    error_buff = "Mode not valid. Modes available: (face|vertex)";
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Mode not valid. Modes available: (face|vertex)";
                     return;
                 }
 
         }
 
-        error_buff.clear();
+        comp_buff.clear();
         terminal_buff.clear();
     }
 }
@@ -295,7 +305,7 @@ void handleAutocomplete()
     
     vector<string> tokens = StringHelper::split(terminal_buff, ' ', true);
 
-    error_buff.clear();
+    comp_buff.clear();
     string buff;
     int found = 0;
     
@@ -311,9 +321,22 @@ void handleAutocomplete()
         }
 
         if (found > 1)
-            error_buff = buff;
+        {
+            comp_color = COLOR_INFO;
+            comp_buff = buff;
+        }
         else if (found == 1)
+        {
+            if (terminal_buff.substr(0, 8) == "obj-open")
+            {
+                comp_color = COLOR_INFO;
+                
+                for (string obj_file : obj_files)
+                    comp_buff += obj_file + " ";
+            }
+            
             terminal_buff = buff;
+        }
     }
     else
     {
@@ -525,6 +548,15 @@ void init() {
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
+    
+    obj_files.push_back("car.obj");
+    obj_files.push_back("cone.obj");
+    obj_files.push_back("cow.obj");
+    obj_files.push_back("cube.obj");
+    obj_files.push_back("pyramid.obj");
+    obj_files.push_back("whale.obj");
+    obj_files.push_back("horse134.obj");
+    obj_files.push_back("sphere.obj");
 } 
 
 void idle()

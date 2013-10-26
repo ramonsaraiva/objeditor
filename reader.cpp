@@ -94,7 +94,7 @@ bool Reader::readObj(const char* name, Mesh* m){
 	}
 	
 	in.close();
-	
+
 	if(mtl.empty()){
 		for(Group* g1 : m->getGroups()){
 			g1->setMtl("");
