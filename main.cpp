@@ -18,6 +18,7 @@
 #define CMD_FPS_SHOW    1
 #define CMD_FPS_HIDE    2
 #define CMD_OBJ_OPEN    4
+#define CMD_DELETE      9
 #define CMD_MODE        5
 
 using namespace std;
@@ -94,7 +95,7 @@ void selection_info(int mode)
     switch (mode)
     {
         case MODE_FACE:
-            v = mesh->get_selection()->getVerts().size();
+            v = mesh->get_selection()->face->getVerts().size();
             selection_buff = "face V: " + to_string(v);
             break;
         default:
@@ -122,6 +123,17 @@ void processHits (GLint hits, GLuint buffer[])
     
     mesh->set_selection(ptr[0], ptr[1]);
     selection_info(MODE_FACE);
+}
+
+bool delete_selection()
+{
+    if (mesh->get_selection()->face == NULL)
+        return false;
+
+    mesh->getGroupAt(mesh->get_selection()->group_pos)->eraseFaceAt(mesh->get_selection()->face_pos);
+    mesh->get_selection()->face = NULL; 
+    selection_buff.clear();
+    return true;
 }
 
 void calculeFps(){
@@ -317,6 +329,15 @@ void handleTerminal()
                     comp_buff = "Mode not valid. Modes available: (face|vertex)";
                     return;
                 }
+                break;
+            case CMD_DELETE:
+                if (!delete_selection())
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Select something before trying to delete..";
+                    return;
+                }
+                break;
             default:
                 break;
         }
@@ -507,6 +528,10 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'V':
                 set_mode(MODE_VERTEX);
                 break;
+            case 'x':
+            case 'X':
+                delete_selection();
+                break;
             case 'q':
             case 'Q':
                 exit(0);
@@ -638,6 +663,7 @@ void init() {
     terminal_cmds["fps-show"] = CMD_FPS_SHOW;
     terminal_cmds["fps-hide"] = CMD_FPS_HIDE;
     terminal_cmds["obj-open"] = CMD_OBJ_OPEN;
+    terminal_cmds["delete"] = CMD_DELETE;
     terminal_cmds["mode"] = CMD_MODE;
 
     objfile_buff = "cube.obj";

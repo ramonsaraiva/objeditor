@@ -181,7 +181,7 @@ void Mesh::render2(int renderMode, int glMode){
 		int face_name = 0;
 		
 		for(Face* f : g->getFaces()){
-			if (f == selection)
+			if (f == selection.face)
                 glColor3f(1.0, 0.0, 1.0);
             else
                 glColor3f(1.0, 1.0, 1.0);
@@ -227,10 +227,12 @@ void Mesh::render2(int renderMode, int glMode){
 
 void Mesh::set_selection(int group, int face)
 {
-    selection = groups.at(group)->getFaces().at(face);
+    selection.group_pos = group;
+    selection.face_pos = face;
+    selection.face = groups.at(group)->getFaces().at(face); 
 }
 
-Face* Mesh::get_selection()
+Mesh::FaceSel* Mesh::get_selection()
 {
-    return selection;
+    return &selection;
 }

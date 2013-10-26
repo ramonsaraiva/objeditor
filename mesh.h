@@ -10,13 +10,21 @@
 using namespace std;
 
 class Mesh{
+    public:
+        struct FaceSel
+        {
+            int group_pos;
+            int face_pos;
+            Face* face = NULL;
+        };
+
 	private:
 		vector<Group*> groups;
 		vector<Vertex> verts;
 		vector<Vertex> norms;
 		vector<Texts> texts;
 		map<string, Material*> mats;
-        Face* selection;
+        struct FaceSel selection;
 
 	public:
 		void addGroup(Group* newGroup);
@@ -36,5 +44,5 @@ class Mesh{
 		vector<Texts> getTexts(void);
 		map<string, Material*> getMats(void);
 		Material* getMtl(string name);
-        Face* get_selection();
+        FaceSel* get_selection();
 };
