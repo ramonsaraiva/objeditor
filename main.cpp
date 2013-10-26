@@ -13,6 +13,8 @@
 
 #define CMD_EXIT        0
 #define CMD_COMMANDS    6
+#define CMD_DATA_SHOW   7
+#define CMD_DATA_HIDE   8
 #define CMD_FPS_SHOW    1
 #define CMD_FPS_HIDE    2
 #define CMD_OBJ_OPEN    4
@@ -23,15 +25,6 @@ using namespace std;
 #define BUFSIZE 512
 
 int width = 1000, height = 1000;
-
-bool terminal_mode = false;
-bool fps_enabled = true;
-
-string terminal_buff;
-string comp_buff;
-string objfile_buff;
-string viewmode_buff;
-string selection_buff;
 
 Mesh* mesh;
 
@@ -44,6 +37,17 @@ char s[20];
 unsigned int* ids;
 
 int glMode = GL_POLYGON;
+
+bool terminal_mode = false;
+bool fps_enabled = true;
+bool data_enabled = true;
+
+/* display buffers */
+string terminal_buff;
+string comp_buff;
+string objfile_buff;
+string viewmode_buff;
+string selection_buff;
 
 map<string, int> terminal_cmds;
 vector<string> obj_files;
@@ -184,15 +188,6 @@ void drawScene(){
 	switch2D();
 	//Draw 2D stuff
     
-    if (fps_enabled)
-    {
-        /* fps */
-        currentTime = glutGet(GLUT_ELAPSED_TIME);
-        glColor3f(1.0f, 0.85f, 0.95f);
-        sprintf(s,"FPS: %4.2f", frames*1000.0/(currentTime-timebase));
-        display2d(s, 10, 8, 14, GLUT_BITMAP_HELVETICA_18);
-    }
-
 	if (terminal_mode)
     {
         /* comp */
@@ -208,17 +203,29 @@ void drawScene(){
         display2d(terminal_buff.c_str(), 220, 8, 14, GLUT_BITMAP_HELVETICA_18);
 	}
 
-    /* obj file */
-    glColor3f(0.180392f, 0.545098f, 0.341176f);
-    display2d(objfile_buff.c_str(), 10, height - 26, 14, GLUT_BITMAP_HELVETICA_18);
-    
-    /* view mode */
-    glColor3f(0.254902f, 0.411765f, 0.882353f);
-    display2d(viewmode_buff.c_str(), 10, height - 49, 14, GLUT_BITMAP_HELVETICA_18);
+    if (data_enabled)
+    {
+        if (fps_enabled)
+        {
+            /* fps */
+            currentTime = glutGet(GLUT_ELAPSED_TIME);
+            glColor3f(1.0f, 0.85f, 0.95f);
+            sprintf(s,"FPS: %4.2f", frames*1000.0/(currentTime-timebase));
+            display2d(s, 10, 8, 14, GLUT_BITMAP_HELVETICA_18);
+        }
 
-    /* selection info */
-    glColor3f(0.980392f, 0.501961f, 0.447059f);
-    display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
+        /* obj file */
+        glColor3f(0.180392f, 0.545098f, 0.341176f);
+        display2d(objfile_buff.c_str(), 10, height - 26, 14, GLUT_BITMAP_HELVETICA_18);
+        
+        /* view mode */
+        glColor3f(0.254902f, 0.411765f, 0.882353f);
+        display2d(viewmode_buff.c_str(), 10, height - 49, 14, GLUT_BITMAP_HELVETICA_18);
+
+        /* selection info */
+        glColor3f(0.980392f, 0.501961f, 0.447059f);
+        display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
+    }
 
 	//Go back to 3D
 	camera->resetView(width, height);
@@ -250,7 +257,7 @@ void handleTerminal()
     }
     else
     {
-        switch(terminal_cmds[tokens.front()])
+        switch (terminal_cmds[tokens.front()])
         {
             case CMD_EXIT:
                 exit(0);
@@ -263,6 +270,12 @@ void handleTerminal()
                     if (cmd.first != "commands")
                         comp_buff += cmd.first + " ";
                 }
+                break;
+            case CMD_DATA_SHOW:
+                data_enabled = true;
+                break;
+            case CMD_DATA_HIDE:
+                data_enabled = false;
                 break;
             case CMD_FPS_SHOW:
                 fps_enabled = true;
@@ -620,6 +633,8 @@ void init() {
 
     terminal_cmds["exit"] = CMD_EXIT;
     terminal_cmds["commands"] = CMD_COMMANDS;
+    terminal_cmds["data-show"] = CMD_DATA_SHOW;
+    terminal_cmds["data-hide"] = CMD_DATA_HIDE;
     terminal_cmds["fps-show"] = CMD_FPS_SHOW;
     terminal_cmds["fps-hide"] = CMD_FPS_HIDE;
     terminal_cmds["obj-open"] = CMD_OBJ_OPEN;
