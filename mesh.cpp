@@ -182,7 +182,7 @@ void Mesh::render2(int renderMode, int glMode){
 		
 		for(Face* f : g->getFaces()){
 			if (f == selection.face)
-                glColor3f(1.0, 0.0, 1.0);
+                glColor3f(0.603922f, 0.803922f, 0.196078f);
             else
                 glColor3f(1.0, 1.0, 1.0);
 			

@@ -536,7 +536,6 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'Q':
                 exit(0);
                 break;
-
         }
         glutPostRedisplay();
     }
