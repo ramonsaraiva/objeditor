@@ -12,6 +12,7 @@
 #define MODE_VERTEX     1
 
 #define CMD_EXIT        0
+#define CMD_COMMANDS    6
 #define CMD_FPS_SHOW    1
 #define CMD_FPS_HIDE    2
 #define CMD_OBJ_OPEN    4
@@ -239,10 +240,12 @@ void handleTerminal()
 
     vector<string> tokens = StringHelper::split(terminal_buff, ' ', true);
 
+    comp_buff.clear();
+
     if (!(terminal_cmds.find(tokens.front()) != terminal_cmds.end()))
     {
         comp_color = COLOR_ERROR;
-        comp_buff = " *Command \"" + tokens.front() + "\" not found";
+        comp_buff = "The command \"" + tokens.front() + "\" was not found, try \"commands\" to see what is available ";
         return;
     }
     else
@@ -251,6 +254,15 @@ void handleTerminal()
         {
             case CMD_EXIT:
                 exit(0);
+                break;
+            case CMD_COMMANDS:
+                comp_color = COLOR_INFO;
+                comp_buff.clear();
+                for (auto cmd : terminal_cmds)
+                {
+                    if (cmd.first != "commands")
+                        comp_buff += cmd.first + " ";
+                }
                 break;
             case CMD_FPS_SHOW:
                 fps_enabled = true;
@@ -269,8 +281,10 @@ void handleTerminal()
                 if (loadOBJ((string("obj/") + tokens.at(1)).c_str()))
                     objfile_buff = tokens.at(1);
                 else
+                {
                     comp_color = COLOR_ERROR;
                     comp_buff = "Object \"" + tokens.at(1) + "\" not found";
+                }
                 break;
             case CMD_MODE:
                 if (!(tokens.size() == 2))
@@ -293,7 +307,6 @@ void handleTerminal()
 
         }
 
-        comp_buff.clear();
         terminal_buff.clear();
     }
 }
@@ -305,7 +318,6 @@ void handleAutocomplete()
     
     vector<string> tokens = StringHelper::split(terminal_buff, ' ', true);
 
-    comp_buff.clear();
     string buff;
     int found = 0;
     
@@ -330,7 +342,8 @@ void handleAutocomplete()
             if (terminal_buff.substr(0, 8) == "obj-open")
             {
                 comp_color = COLOR_INFO;
-                
+                comp_buff.clear();
+
                 for (string obj_file : obj_files)
                     comp_buff += obj_file + " ";
             }
@@ -338,8 +351,29 @@ void handleAutocomplete()
             terminal_buff = buff;
         }
     }
-    else
+    else if (tokens.size() > 1)
     {
+        if (terminal_cmds[tokens.front()] == CMD_OBJ_OPEN)
+        {
+            for (string obj_file : obj_files)
+            {
+                if (obj_file.substr(0, tokens.at(1).size()) == tokens.at(1))
+                {
+                    buff += obj_file + " ";
+                    found++;
+                }
+            }
+
+            if (found > 1)
+            {
+                comp_color = COLOR_INFO;
+                comp_buff = buff;
+            }
+            else if (found == 1)
+            {
+                terminal_buff = tokens.front() + " " + buff;
+            }
+        }
     }
 }
 
@@ -541,6 +575,7 @@ void init() {
 	timebase = glutGet(GLUT_ELAPSED_TIME);
 
     terminal_cmds["exit"] = CMD_EXIT;
+    terminal_cmds["commands"] = CMD_COMMANDS;
     terminal_cmds["fps-show"] = CMD_FPS_SHOW;
     terminal_cmds["fps-hide"] = CMD_FPS_HIDE;
     terminal_cmds["obj-open"] = CMD_OBJ_OPEN;
