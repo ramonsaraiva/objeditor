@@ -52,9 +52,6 @@ Material* Mesh::getMtl(string name){
 }
 
 void Mesh::render(int renderMode){
-
-	glColor3f(1.0, 1.0, 1.0);
-	
 	int group_name = 0;
 	int currentID = 0;
 	
@@ -90,7 +87,7 @@ void Mesh::render(int renderMode){
 		int face_name = 0;
 		
 		for(Face* f : g->getFaces()){
-			
+
 			vector<int> v = f->getVerts();
 			vector<int> n = f->getNorms();
 			vector<int> t = f->getTexts();
@@ -149,9 +146,6 @@ void Mesh::renderVerts(void){
 
 
 void Mesh::render2(int renderMode, int glMode){
-
-	glColor3f(1.0, 1.0, 1.0);
-	
 	int group_name = 0;
 	int currentID = 0;
 	
@@ -187,6 +181,10 @@ void Mesh::render2(int renderMode, int glMode){
 		int face_name = 0;
 		
 		for(Face* f : g->getFaces()){
+			if (f == selection)
+                glColor3f(1.0, 0.0, 1.0);
+            else
+                glColor3f(1.0, 1.0, 1.0);
 			
 			vector<int> v = f->getVerts();
 			vector<int> n = f->getNorms();
@@ -225,4 +223,9 @@ void Mesh::render2(int renderMode, int glMode){
 	if(glMode == GL_LINE_LOOP){
 		renderVerts();
 	}
+}
+
+void Mesh::set_selection(int group, int face)
+{
+    selection = groups.at(group)->getFaces().at(face);
 }

@@ -16,6 +16,7 @@ class Mesh{
 		vector<Vertex> norms;
 		vector<Texts> texts;
 		map<string, Material*> mats;
+        Face* selection;
 
 	public:
 		void addGroup(Group* newGroup);
@@ -26,7 +27,7 @@ class Mesh{
 		void render(int renderMode);
 		void render2(int renderMode, int glMode);
 		void renderVerts(void);
-		
+        void set_selection(int group, int face);
 
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);

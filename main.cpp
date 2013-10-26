@@ -30,6 +30,7 @@ string terminal_buff;
 string error_buff;
 string objfile_buff;
 string viewmode_buff;
+string selected_buff;
 
 Mesh* mesh;
 
@@ -93,7 +94,8 @@ void processHits (GLint hits, GLuint buffer[])
 		ptr += names + 2;
 	}
 	ptr = ptrNames;
-	mesh->getGroupAt(ptr[0])->eraseFaceAt(ptr[1]);
+    
+    mesh->set_selection(ptr[0], ptr[1]);
 }
 
 void calculeFps(){
