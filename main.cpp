@@ -428,11 +428,11 @@ void handleKeypress(unsigned char key, int x, int y) {
                 break;
             case 'h':
             case 'H':
-                camera->changeAngle(-2.0);
+                camera->changeAngle(-3.5);
                 break;
             case 'l':
             case 'L':
-                camera->changeAngle(2.0);
+                camera->changeAngle(3.5);
                 break;
             case 'k':
             case 'K':
