@@ -30,7 +30,7 @@ string terminal_buff;
 string error_buff;
 string objfile_buff;
 string viewmode_buff;
-string selected_buff;
+string selection_buff;
 
 Mesh* mesh;
 
@@ -77,6 +77,21 @@ bool loadOBJ(const char* s){
     return true;
 }
 
+void selection_info(int mode)
+{
+    int v = 0;
+
+    switch (mode)
+    {
+        case MODE_FACE:
+            v = mesh->get_selection()->getVerts().size();
+            selection_buff = "face V: " + to_string(v);
+            break;
+        default:
+            break;
+    }
+} 
+
 void processHits (GLint hits, GLuint buffer[])
 {
    GLuint names, *ptr, minZ, *ptrNames;
@@ -96,6 +111,7 @@ void processHits (GLint hits, GLuint buffer[])
 	ptr = ptrNames;
     
     mesh->set_selection(ptr[0], ptr[1]);
+    selection_info(MODE_FACE);
 }
 
 void calculeFps(){
@@ -121,12 +137,12 @@ void set_mode(int mode)
         case MODE_FACE:
             if (glMode != GL_POLYGON)
                 glMode = GL_POLYGON;
-            viewmode_buff = "face mode";
+            viewmode_buff = "mode face";
             break;
         case MODE_VERTEX:
             if (glMode != GL_LINE_LOOP)
                 glMode = GL_LINE_LOOP;
-            viewmode_buff = "vertex mode";
+            viewmode_buff = "mode vertex";
             break;
         default:
             break;
@@ -194,6 +210,9 @@ void drawScene(){
     glColor3f(0.254902f, 0.411765f, 0.882353f);
     display2d(viewmode_buff.c_str(), 10, height - 49, 14, GLUT_BITMAP_HELVETICA_18);
 
+    /* selection info */
+    glColor3f(0.980392f, 0.501961f, 0.447059f);
+    display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
 
 	//Go back to 3D
 	camera->resetView(width, height);
@@ -378,6 +397,7 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'Q':
                 exit(0);
                 break;
+
         }
         glutPostRedisplay();
     }
@@ -504,7 +524,7 @@ void init() {
     terminal_cmds["mode"] = CMD_MODE;
 
     objfile_buff = "cube.obj";
-    viewmode_buff = "face mode";
+    set_mode(MODE_FACE);
 } 
 
 void idle()
@@ -522,7 +542,7 @@ int main(int argc, char** argv) {
   
 	// cria janela 
 	glutCreateWindow("exemplo de visualização de objetos");  
-	//glutFullScreen();
+	glutFullScreen();
 	init(); 
   
 	// seta funções

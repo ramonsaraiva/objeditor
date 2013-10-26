@@ -36,4 +36,5 @@ class Mesh{
 		vector<Texts> getTexts(void);
 		map<string, Material*> getMats(void);
 		Material* getMtl(string name);
+        Face* get_selection();
 };

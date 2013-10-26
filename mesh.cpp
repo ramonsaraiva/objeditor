@@ -229,3 +229,8 @@ void Mesh::set_selection(int group, int face)
 {
     selection = groups.at(group)->getFaces().at(face);
 }
+
+Face* Mesh::get_selection()
+{
+    return selection;
+}
