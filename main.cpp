@@ -245,7 +245,7 @@ void handleTerminal()
     if (!(terminal_cmds.find(tokens.front()) != terminal_cmds.end()))
     {
         comp_color = COLOR_ERROR;
-        comp_buff = "The command \"" + tokens.front() + "\" was not found, try \"commands\" to see what is available ";
+        comp_buff = "The command \"" + tokens.front() + "\" was not found, try \"commands\" to see which is available ";
         return;
     }
     else
@@ -304,10 +304,69 @@ void handleTerminal()
                     comp_buff = "Mode not valid. Modes available: (face|vertex)";
                     return;
                 }
-
+            default:
+                break;
         }
 
         terminal_buff.clear();
+    }
+}
+
+void handleAutohelper()
+{
+    if (!terminal_buff.size())
+        return;
+    
+    vector<string> tokens = StringHelper::split(terminal_buff, ' ', true);
+
+    string buff;
+    int found = 0;
+    
+    if (tokens.size() == 1)
+    {
+        for (auto cmd : terminal_cmds)
+        {
+            if (cmd.first.substr(0, tokens.front().size()) == tokens.front())
+            {
+                buff += cmd.first + " ";
+                found++;
+            }
+        }
+
+        if (found)
+        {
+            comp_color = COLOR_INFO;
+            comp_buff = buff;
+
+            if (terminal_buff.substr(0, 8) == "obj-open")
+            {
+                comp_color = COLOR_INFO;
+                comp_buff.clear();
+
+                for (string obj_file : obj_files)
+                    comp_buff += obj_file + " ";
+            }
+        }
+    }
+    else if (tokens.size() > 1)
+    {
+        if (terminal_cmds[tokens.front()] == CMD_OBJ_OPEN)
+        {
+            for (string obj_file : obj_files)
+            {
+                if (obj_file.substr(0, tokens.at(1).size()) == tokens.at(1))
+                {
+                    buff += obj_file + " ";
+                    found++;
+                }
+            }
+
+            if (found)
+            {
+                comp_color = COLOR_INFO;
+                comp_buff = buff;
+            }
+        }
     }
 }
 
@@ -332,24 +391,8 @@ void handleAutocomplete()
             }
         }
 
-        if (found > 1)
-        {
-            comp_color = COLOR_INFO;
-            comp_buff = buff;
-        }
-        else if (found == 1)
-        {
-            if (terminal_buff.substr(0, 8) == "obj-open")
-            {
-                comp_color = COLOR_INFO;
-                comp_buff.clear();
-
-                for (string obj_file : obj_files)
-                    comp_buff += obj_file + " ";
-            }
-            
+        if (found == 1)
             terminal_buff = buff;
-        }
     }
     else if (tokens.size() > 1)
     {
@@ -364,15 +407,8 @@ void handleAutocomplete()
                 }
             }
 
-            if (found > 1)
-            {
-                comp_color = COLOR_INFO;
-                comp_buff = buff;
-            }
-            else if (found == 1)
-            {
+            if (found == 1)
                 terminal_buff = tokens.front() + " " + buff;
-            }
         }
     }
 }
@@ -392,7 +428,13 @@ void handleKeypress(unsigned char key, int x, int y) {
             /* backspace */
             case 8:
                 if(terminal_buff.size())
+                {
                     terminal_buff.pop_back();
+                    if (terminal_buff.size())
+                        handleAutohelper();
+                    else
+                        comp_buff.clear();
+                }
                 break;
             /* enter */
             case 13:
@@ -401,9 +443,11 @@ void handleKeypress(unsigned char key, int x, int y) {
             /* tab */
             case 9:
                 handleAutocomplete();
+                handleAutohelper();
                 break;
             default:
                 terminal_buff += key;
+                handleAutohelper();
         }
     }
     else
