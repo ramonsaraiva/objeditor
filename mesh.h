@@ -4,6 +4,7 @@
 #include "material.h"
 #include <iostream>
 #include <map>
+#include <algorithm>
 #include <GL/gl.h> 
 #include <GL/glut.h>
 
@@ -36,6 +37,7 @@ class Mesh{
 		void render2(int renderMode, int glMode);
 		void renderVerts(void);
         void set_selection(int group, int face);
+        void mess();
 
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);

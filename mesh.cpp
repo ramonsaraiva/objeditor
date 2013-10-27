@@ -23,6 +23,13 @@ void Mesh::addMats(Material* newM){
 	}
 }
 
+void Mesh::set_selection(int group, int face)
+{
+    selection.group_pos = group;
+    selection.face_pos = face;
+    selection.face = groups.at(group)->getFaces().at(face); 
+}
+
 vector<Group*> Mesh::getGroups(void){
 	return groups;
 }
@@ -49,6 +56,11 @@ map<string, Material*> Mesh::getMats(void){
 
 Material* Mesh::getMtl(string name){
 	return mats[name];
+}
+
+Mesh::FaceSel* Mesh::get_selection()
+{
+    return &selection;
 }
 
 void Mesh::render(int renderMode){
@@ -225,14 +237,7 @@ void Mesh::render2(int renderMode, int glMode){
 	}
 }
 
-void Mesh::set_selection(int group, int face)
+void Mesh::mess()
 {
-    selection.group_pos = group;
-    selection.face_pos = face;
-    selection.face = groups.at(group)->getFaces().at(face); 
-}
-
-Mesh::FaceSel* Mesh::get_selection()
-{
-    return &selection;
+   random_shuffle(verts.begin(), verts.end());
 }

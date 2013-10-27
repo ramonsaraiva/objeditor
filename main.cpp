@@ -8,6 +8,8 @@
 #include <GL/gl.h> 
 #include <GL/glut.h>
 
+#define BUFSIZE 512
+
 #define MODE_FACE       0
 #define MODE_VERTEX     1
 
@@ -18,12 +20,11 @@
 #define CMD_FPS_SHOW    1
 #define CMD_FPS_HIDE    2
 #define CMD_OBJ_OPEN    4
-#define CMD_DELETE      9
 #define CMD_MODE        5
+#define CMD_DELETE      9
+#define CMD_MESS        10
 
 using namespace std;
-
-#define BUFSIZE 512
 
 int width = 1000, height = 1000;
 
@@ -338,6 +339,9 @@ void handleTerminal()
                     return;
                 }
                 break;
+            case CMD_MESS:
+                mesh->mess();
+                break;
             default:
                 break;
         }
@@ -532,6 +536,10 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'X':
                 delete_selection();
                 break;
+            case 'm':
+            case 'M':
+                mesh->mess(); 
+                break;
             case 'q':
             case 'Q':
                 exit(0);
@@ -662,8 +670,9 @@ void init() {
     terminal_cmds["fps-show"] = CMD_FPS_SHOW;
     terminal_cmds["fps-hide"] = CMD_FPS_HIDE;
     terminal_cmds["obj-open"] = CMD_OBJ_OPEN;
-    terminal_cmds["delete"] = CMD_DELETE;
     terminal_cmds["mode"] = CMD_MODE;
+    terminal_cmds["delete"] = CMD_DELETE;
+    terminal_cmds["mess"] = CMD_MESS;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
