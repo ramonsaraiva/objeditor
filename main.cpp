@@ -642,8 +642,7 @@ void init() {
 	glLineWidth(3);
 	glPointSize(10);
 	
-	// glutSetCursor(GLUT_CURSOR_NONE);
-
+	glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 
 	GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
 	GLfloat light_specular[] = {1.0, 1.0, 1.0,1.0};
@@ -677,18 +676,7 @@ void init() {
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
     
-    obj_files.push_back("cat");
-    obj_files.push_back("cone");
-    obj_files.push_back("cow");
-    obj_files.push_back("cube");
-    obj_files.push_back("horse");
-    obj_files.push_back("parthenon");
-    obj_files.push_back("pyramid");
-    obj_files.push_back("rabbit");
-    obj_files.push_back("sphere");
-    obj_files.push_back("teapot");
-    obj_files.push_back("torreDiPisa");
-    obj_files.push_back("whale");
+    obj_files = {"cat", "cone", "cow", "cube", "horse", "parthenon", "pyramid", "rabbit", "sphere", "teapot", "torreDiPisa", "whale"};
 } 
 
 void idle()
