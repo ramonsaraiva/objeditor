@@ -303,6 +303,18 @@ void drawScene(){
         /* selection info */
         glColor3f(0.980392f, 0.501961f, 0.447059f);
         display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
+
+        if (cartesian_plane_enabled)
+        {
+            glColor3f(1.0f, 0.0f, 0.0f);
+            display2d("X", 10, 30, 14, GLUT_BITMAP_HELVETICA_18);
+
+            glColor3f(0.0f, 1.0f, 0.0f);
+            display2d("Y", 28, 30, 14, GLUT_BITMAP_HELVETICA_18);
+
+            glColor3f(0.0f, 0.0f, 1.0f);
+            display2d("Z", 45, 30, 14, GLUT_BITMAP_HELVETICA_18);
+        }
     }
 
 	//Go back to 3D
