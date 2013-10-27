@@ -645,6 +645,16 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'P':
                 cartesian_plane_enabled = !cartesian_plane_enabled;
                 break;
+            case 'i':
+            case 'I':
+                camera->moveSide(1);
+                camera->changeAngle(3.5);
+                break;
+            case 'o':
+            case 'O':
+                camera->moveSide(-1);
+                camera->changeAngle(-3.5);
+                break;
             case 'q':
             case 'Q':
                 exit(0);
