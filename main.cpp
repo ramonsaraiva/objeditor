@@ -23,6 +23,9 @@
 #define CMD_MODE        5
 #define CMD_DELETE      9
 #define CMD_MESS        10
+#define CMD_PLANE_SHOW  11
+#define CMD_PLANE_HIDE  12
+#define CMD_PLANE_SIZE  13
 
 using namespace std;
 
@@ -43,6 +46,9 @@ int glMode = GL_POLYGON;
 bool terminal_mode = false;
 bool fps_enabled = true;
 bool data_enabled = true;
+bool cartesian_plane_enabled = false;
+
+float cartesian_plane_size = 9;
 
 /* display buffers */
 string terminal_buff;
@@ -137,6 +143,62 @@ bool delete_selection()
     return true;
 }
 
+void draw_cartesian_plane()
+{
+    glLineStipple(1, 0x00FF);
+    
+    /* X line */
+    glColor3f(1.0f, 0.0f, 0.0f);
+
+    glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(cartesian_plane_size, 0.0f, 0.0f);
+    glEnd();
+
+    glEnable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(-cartesian_plane_size, 0.0f, 0.0f);
+    glEnd();
+
+    /* Y line */
+    glColor3f(0.0f, 1.0f, 0.0f);
+
+    glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, cartesian_plane_size, 0.0f);
+    glEnd();
+
+    glEnable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, -cartesian_plane_size, 0.0f);
+    glEnd();
+
+    /* Z line */
+    glColor3f(0.0f, 0.0f, 1.0f);
+
+    glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, cartesian_plane_size);
+    glEnd();
+
+    glEnable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, -cartesian_plane_size);
+    glEnd();
+}
+
 void calculeFps(){
 	frames++;
 
@@ -197,6 +259,9 @@ void drawScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
 	mesh->render2(GL_RENDER, glMode);
+
+    if (cartesian_plane_enabled)
+        draw_cartesian_plane();
 	
 	switch2D();
 	//Draw 2D stuff
@@ -342,6 +407,30 @@ void handleTerminal()
             case CMD_MESS:
                 mesh->mess();
                 break;
+            case CMD_PLANE_SHOW:
+                cartesian_plane_enabled = true;
+                break;
+            case CMD_PLANE_HIDE:
+                cartesian_plane_enabled = false;
+                break;
+            case CMD_PLANE_SIZE:
+                if (!(tokens.size() == 2))
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Wrong parameters. Usage: cplane-size [SIZE]";
+                    return;
+                }
+                
+                if (atoi(tokens.at(1).c_str()) <= 0)
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Cartesian plane size must be bigger than 0";
+                    return;
+                }
+
+                cartesian_plane_size = atoi(tokens.at(1).c_str());
+                break;
+
             default:
                 break;
         }
@@ -540,6 +629,10 @@ void handleKeypress(unsigned char key, int x, int y) {
             case 'M':
                 mesh->mess(); 
                 break;
+            case 'p':
+            case 'P':
+                cartesian_plane_enabled = !cartesian_plane_enabled;
+                break;
             case 'q':
             case 'Q':
                 exit(0);
@@ -672,6 +765,9 @@ void init() {
     terminal_cmds["mode"] = CMD_MODE;
     terminal_cmds["delete"] = CMD_DELETE;
     terminal_cmds["mess"] = CMD_MESS;
+    terminal_cmds["cplane-show"] = CMD_PLANE_SHOW;
+    terminal_cmds["cplane-hide"] = CMD_PLANE_HIDE;
+    terminal_cmds["cplane-size"] = CMD_PLANE_SIZE;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
