@@ -300,11 +300,11 @@ void handleTerminal()
                 if (!(tokens.size() == 2))
                 {
                     comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: obj-open [FILE]";
+                    comp_buff = "Wrong parameters. Usage: obj-open [OBJ]";
                     return;
                 }
 
-                if (loadOBJ((string("obj/") + tokens.at(1)).c_str()))
+                if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str()))
                     objfile_buff = tokens.at(1);
                 else
                 {
@@ -677,14 +677,18 @@ void init() {
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
     
-    obj_files.push_back("car.obj");
-    obj_files.push_back("cone.obj");
-    obj_files.push_back("cow.obj");
-    obj_files.push_back("cube.obj");
-    obj_files.push_back("pyramid.obj");
-    obj_files.push_back("whale.obj");
-    obj_files.push_back("horse134.obj");
-    obj_files.push_back("sphere.obj");
+    obj_files.push_back("cat");
+    obj_files.push_back("cone");
+    obj_files.push_back("cow");
+    obj_files.push_back("cube");
+    obj_files.push_back("horse");
+    obj_files.push_back("parthenon");
+    obj_files.push_back("pyramid");
+    obj_files.push_back("rabbit");
+    obj_files.push_back("sphere");
+    obj_files.push_back("teapot");
+    obj_files.push_back("torreDiPisa");
+    obj_files.push_back("whale");
 } 
 
 void idle()
