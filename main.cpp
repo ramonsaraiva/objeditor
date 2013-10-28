@@ -611,19 +611,19 @@ void handleKeypress(unsigned char key, int x, int y) {
                 break;
             case 'h':
             case 'H':
-                camera->changeAngle(-3.5);
+                camera->changeAngle(-0.4);
                 break;
             case 'l':
             case 'L':
-                camera->changeAngle(3.5);
+                camera->changeAngle(0.4);
                 break;
             case 'k':
             case 'K':
-                camera->setDirectionY(0.1);
+                camera->setDirectionY(0.01);
                 break;
             case 'j':
             case 'J':
-                camera->setDirectionY(-0.1);
+                camera->setDirectionY(-0.01);
                 break;
             case 'f':
             case 'F':
