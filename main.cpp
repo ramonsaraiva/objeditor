@@ -749,16 +749,27 @@ void handleResize(int w, int h) {
 
 void handleMouse(int button, int state, int x, int y){
 
-	if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
-	  return;
-	  
-	GLuint selectBuf[BUFSIZE];
-	GLint hits;
+    if (state != GLUT_DOWN)
+        return;
 
-	hits = switchSelect(selectBuf, x, y);
+    GLuint selectBuf[BUFSIZE];
+    GLint hits;
 
-	if (hits != 0)
-		processHits(hits,selectBuf);
+    hits = switchSelect(selectBuf, x, y);
+
+	if (button == GLUT_LEFT_BUTTON)
+    {
+        if (hits != 0)
+            processHits(hits,selectBuf);
+    }
+    
+    if (button == GLUT_RIGHT_BUTTON)
+    {
+        if (hits == 0)
+        {
+            /* creates a new face */
+        }
+    }
 		
 	glutPostRedisplay();
 }
