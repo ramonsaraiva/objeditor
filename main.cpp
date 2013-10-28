@@ -147,7 +147,7 @@ void draw_cartesian_plane()
 {
     glLineStipple(1, 0x00FF);
     
-    /* X line */
+    /* X positive and negative lines */
     glColor3f(1.0f, 0.0f, 0.0f);
 
     glDisable(GL_LINE_STIPPLE);
@@ -157,14 +157,22 @@ void draw_cartesian_plane()
     glVertex3f(cartesian_plane_size, 0.0f, 0.0f);
     glEnd();
 
+    glBegin(GL_POINTS);
+    glVertex3f(cartesian_plane_size, 0.0f, 0.0f);
+    glEnd();
+
     glEnable(GL_LINE_STIPPLE);
 
     glBegin(GL_LINES);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(-cartesian_plane_size, 0.0f, 0.0f);
     glEnd();
+    
+    glBegin(GL_POINTS);
+    glVertex3f(-cartesian_plane_size, 0.0f, 0.0f);
+    glEnd();
 
-    /* Y line */
+    /* Y positive and negative lines */
     glColor3f(0.0f, 1.0f, 0.0f);
 
     glDisable(GL_LINE_STIPPLE);
@@ -174,14 +182,22 @@ void draw_cartesian_plane()
     glVertex3f(0.0f, cartesian_plane_size, 0.0f);
     glEnd();
 
+    glBegin(GL_POINTS);
+    glVertex3f(0.0f, cartesian_plane_size, 0.0f);
+    glEnd();
+
     glEnable(GL_LINE_STIPPLE);
 
     glBegin(GL_LINES);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, -cartesian_plane_size, 0.0f);
     glEnd();
+    
+    glBegin(GL_POINTS);
+    glVertex3f(0.0f, -cartesian_plane_size, 0.0f);
+    glEnd();
 
-    /* Z line */
+    /* Z positive and negative lines */
     glColor3f(0.0f, 0.0f, 1.0f);
 
     glDisable(GL_LINE_STIPPLE);
@@ -191,10 +207,18 @@ void draw_cartesian_plane()
     glVertex3f(0.0f, 0.0f, cartesian_plane_size);
     glEnd();
 
+    glBegin(GL_POINTS);
+    glVertex3f(0.0f, 0.0f, cartesian_plane_size);
+    glEnd();
+
     glEnable(GL_LINE_STIPPLE);
 
     glBegin(GL_LINES);
     glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, -cartesian_plane_size);
+    glEnd();
+
+    glBegin(GL_POINTS);
     glVertex3f(0.0f, 0.0f, -cartesian_plane_size);
     glEnd();
 }
