@@ -26,15 +26,14 @@ class Mesh{
 		vector<Texts> texts;
 		map<string, Material*> mats;
         struct FaceSel selection;
-        /* holytest */
-        GLfloat* vertices;
+
+        GLfloat* geometry;
         GLuint* indices;
 
-        int vertices_size;
+        int geometry_size;
         int indices_size;
-        int normals_size;
 
-        GLuint vertices_vboid;
+        GLuint geometry_vboid;
         GLuint indices_vboid;
 
 	public:
@@ -47,8 +46,8 @@ class Mesh{
 		void render2(int renderMode, int glMode);
 		void renderVerts(void);
         void set_selection(int group, int face);
-        void holytest();
-        void holytest2();
+        void upload_to_gpu();
+        void render_gpu_data();
         void mess();
 
 		Group* getGroupAt(int i);

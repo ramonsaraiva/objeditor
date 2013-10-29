@@ -237,21 +237,42 @@ void Mesh::render2(int renderMode, int glMode){
 	}
 }
 
-void Mesh::holytest()
+void Mesh::upload_to_gpu()
 {
     int it = 0;
-    vertices_size = verts.size() * 3;
 
+    /*
+     * array sizes
+     */
+
+    geometry_size = verts.size() * 6;
     indices_size = 0;
-    vertices = new GLfloat[vertices_size];
-    
-    for (Vertex v : verts)
+
+    /*
+     * filling geometry array 
+     *
+     * pos 0, 1, 2 -> vertex X, Y, Z
+     * pos 3, 4, 5 -> normal X, Y, Z
+     *
+     * if necessary will add 2 positions for the texture
+     * resulting in an 8 dim. array
+     */
+
+    geometry = new GLfloat[geometry_size];
+
+    for (int i = 0; i < verts.size(); i++)
     {
-        for (int i = 0; i < 3; i++)
-            vertices[it++] = (GLfloat) v.getCoords()[i];
+        for (int j = 0; j < 3; j++)
+            geometry[it++] = (GLfloat) verts.at(i).getCoords()[j];
+        for (int j = 0; j < 3; j++)
+            geometry[it++] = (GLfloat) norms.at(i).getCoords()[j];
     }
 
     it = 0;
+    
+    /* 
+     * filling indices array
+     */
 
     for (Group* group : groups)
         for (Face* face : group->getFaces())
@@ -264,27 +285,56 @@ void Mesh::holytest()
             for (int index : face->getVerts())
                 indices[it++] = (GLuint) index;
 
-    glGenBuffersARB(1, &vertices_vboid);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices_vboid);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLfloat) * vertices_size, vertices, GL_STATIC_DRAW_ARB);
+    /*
+     * setting up geometry buffer 
+     */
+
+    glGenBuffersARB(1, &geometry_vboid);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, geometry_vboid);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLfloat) * geometry_size, geometry, GL_DYNAMIC_DRAW_ARB);
+
+    /*
+     * setting indices buffer 
+     */
 
     glGenBuffersARB(1, &indices_vboid);
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, indices_vboid);
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLuint) * indices_size, indices, GL_STATIC_DRAW_ARB);
+
+    delete [] geometry;
+    delete [] indices;
 }
 
-void Mesh::holytest2()
+void Mesh::render_gpu_data()
 {
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices_vboid);
+    glColor3f(1.0, 1.0, 1.0);
+    /*
+     * binding buffers with the VBO id pointer
+     */
+
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, geometry_vboid);
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indices_vboid);
 
+    /*
+     * enabling normals and vertices
+     */ 
+    glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+    /* rendering */
+    glNormalPointer(GL_FLOAT, sizeof(GLfloat) * 6, (float*)(sizeof(GLfloat) * 3));
+    glVertexPointer(3, GL_FLOAT, sizeof(GLfloat) * 6, 0);
     glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
 
+    /*
+     * disabling normals and vertices
+     */ 
+    glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
+    /*  
+     * unbinding buffers
+     */
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }

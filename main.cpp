@@ -174,7 +174,7 @@ void drawScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//mesh->render2(GL_RENDER, glMode);
-    mesh->holytest2();
+    mesh->render_gpu_data();
 
     if (cartesian_plane_enabled)
         draw_cartesian_plane();
@@ -664,6 +664,8 @@ bool loadOBJ(const char* s)
 	
     if (!Reader::readObj(s, mesh))
         return false;
+
+    mesh->upload_to_gpu();
 	
 	int textCount = Material::getTextCount();
 
@@ -688,8 +690,6 @@ bool loadOBJ(const char* s)
 			free(img->getPixels());
 		}
 	}
-
-    mesh->holytest();
 
     return true;
 }
@@ -739,7 +739,7 @@ int switchSelect(GLuint* selectBuf, int x, int y)
 	gluPerspective(45.0, width / (double)height, 0.2, 500.0);
 
 	//mesh->render2(GL_SELECT, glMode);
-    mesh->holytest2();
+    mesh->render_gpu_data();
 
 	glMatrixMode (GL_PROJECTION);
 	glPopMatrix ();
