@@ -5,8 +5,6 @@
 #include <utility>
 #include <algorithm>
 #include <map>
-#include <GL/gl.h> 
-#include <GL/glut.h>
 
 #define BUFSIZE 512
 
@@ -99,6 +97,8 @@ int main(int argc, char** argv)
 
     glutCreateWindow("objeditor ~ marcel & ramon");
     glutFullScreen();
+
+    glewInit();
     init();
 
     glutDisplayFunc(drawScene);
@@ -173,7 +173,8 @@ void drawScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	mesh->render2(GL_RENDER, glMode);
+	//mesh->render2(GL_RENDER, glMode);
+    mesh->holytest2();
 
     if (cartesian_plane_enabled)
         draw_cartesian_plane();
@@ -688,6 +689,8 @@ bool loadOBJ(const char* s)
 		}
 	}
 
+    mesh->holytest();
+
     return true;
 }
 
@@ -735,7 +738,8 @@ int switchSelect(GLuint* selectBuf, int x, int y)
 				  5.0, 5.0, viewport);
 	gluPerspective(45.0, width / (double)height, 0.2, 500.0);
 
-	mesh->render2(GL_SELECT, glMode);
+	//mesh->render2(GL_SELECT, glMode);
+    mesh->holytest2();
 
 	glMatrixMode (GL_PROJECTION);
 	glPopMatrix ();

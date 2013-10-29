@@ -2,7 +2,7 @@ CXX = g++
 CFLAGS = -Wall
 LDFLAGS = -std=c++0x
 
-LIBS = -lGL -lglut -lGLU
+	LIBS = -lGL -lGLEW -lglut -lGLU
 
 run: compile
 	./main.exe

@@ -237,6 +237,58 @@ void Mesh::render2(int renderMode, int glMode){
 	}
 }
 
+void Mesh::holytest()
+{
+    int it = 0;
+    vertices_size = verts.size() * 3;
+
+    indices_size = 0;
+    vertices = new GLfloat[vertices_size];
+    
+    for (Vertex v : verts)
+    {
+        for (int i = 0; i < 3; i++)
+            vertices[it++] = (GLfloat) v.getCoords()[i];
+    }
+
+    it = 0;
+
+    for (Group* group : groups)
+        for (Face* face : group->getFaces())
+            indices_size += face->getVerts().size();
+
+    indices = new GLuint[indices_size];
+
+    for (Group* group : groups)
+        for (Face* face : group->getFaces())
+            for (int index : face->getVerts())
+                indices[it++] = (GLuint) index;
+
+    glGenBuffersARB(1, &vertices_vboid);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices_vboid);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLfloat) * vertices_size, vertices, GL_STATIC_DRAW_ARB);
+
+    glGenBuffersARB(1, &indices_vboid);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, indices_vboid);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLuint) * indices_size, indices, GL_STATIC_DRAW_ARB);
+}
+
+void Mesh::holytest2()
+{
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices_vboid);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, indices_vboid);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+}
+
 void Mesh::mess()
 {
    random_shuffle(verts.begin(), verts.end());

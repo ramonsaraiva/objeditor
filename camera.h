@@ -1,6 +1,5 @@
 #include <math.h>
-#include <GL/gl.h>
-#include <GL/glut.h>
+#include <GL/glew.h>
 
 #define PI 3.141592653589
 

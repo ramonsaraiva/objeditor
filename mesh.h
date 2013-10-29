@@ -5,7 +5,7 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
-#include <GL/gl.h> 
+#include <GL/glew.h>
 #include <GL/glut.h>
 
 using namespace std;
@@ -26,6 +26,16 @@ class Mesh{
 		vector<Texts> texts;
 		map<string, Material*> mats;
         struct FaceSel selection;
+        /* holytest */
+        GLfloat* vertices;
+        GLuint* indices;
+
+        int vertices_size;
+        int indices_size;
+        int normals_size;
+
+        GLuint vertices_vboid;
+        GLuint indices_vboid;
 
 	public:
 		void addGroup(Group* newGroup);
@@ -37,6 +47,8 @@ class Mesh{
 		void render2(int renderMode, int glMode);
 		void renderVerts(void);
         void set_selection(int group, int face);
+        void holytest();
+        void holytest2();
         void mess();
 
 		Group* getGroupAt(int i);
