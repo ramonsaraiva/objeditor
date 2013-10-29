@@ -899,4 +899,6 @@ void draw_cartesian_plane()
     glBegin(GL_POINTS);
     glVertex3f(0.0f, 0.0f, -cartesian_plane_size);
     glEnd();
+
+    glDisable(GL_LINE_STIPPLE);
 }
