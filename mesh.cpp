@@ -270,12 +270,72 @@ void Mesh::render_gpu_data()
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }
 
-void Mesh::clear_selection()
-{
+void Mesh::clear_selection() {
     selection.face = NULL;
+}
+
+bool Mesh::has_face_selected()
+{
+    return selection.face != NULL;
+}
+
+bool Mesh::complexify()
+{
+    if (!has_face_selected())
+        return false;
+
+   float xyz[3] = {0}; 
+
+   for (int v : selection.face->getVerts())
+       for (int i = 0; i < 3; i++)
+           xyz[i] += verts[v].getCoords()[i] / selection.face->getVerts().size();
+
+   Vertex centroid = Vertex(xyz);
+
+   addVerts(centroid);
+
+   for (unsigned int i = 0; i < selection.face->getVerts().size(); i++)
+   {
+       Face* f = new Face();
+
+       f->addVert(selection.face->getVerts()[i]);
+       f->addVert(selection.face->getVerts()[(i + 1) % (selection.face->getVerts().size())]);
+       f->addVert(verts.size() - 1);
+
+       groups[selection.group_pos]->addFace(f);
+   }
+
+   groups[selection.group_pos]->eraseFaceAt(selection.face_pos);
+   clear_selection();
+
+   return true;
+}
+
+void Mesh::random_complexify()
+{
+    int random_group_index = rand_lim(groups.size() - 1);
+    int random_face_index = rand_lim(groups[random_group_index]->getFaces().size() - 1);
+
+    selection.group_pos = random_group_index;
+    selection.face_pos = random_face_index;
+    selection.face = groups[random_group_index]->getFaceAt(random_face_index);
+
+    complexify();
 }
 
 void Mesh::mess()
 {
    random_shuffle(verts.begin(), verts.end());
+}
+
+int Mesh::rand_lim(int limit)
+{
+    int divisor = RAND_MAX / (limit + 1);
+    int retval;
+
+    do
+        retval = rand() / divisor;
+    while (retval > limit);
+
+    return retval;
 }

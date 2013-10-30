@@ -32,6 +32,7 @@
 #define CMD_RENDER_VBO      15
 #define CMD_COMPLEXIFY      16
 #define CMD_RAND_COMPLEXIFY 17
+#define CMD_TRIANGULATE     18
 
 using namespace std;
 
@@ -98,14 +99,10 @@ void toggle_terminal();
 void set_mode(int mode);
 bool has_face_selected();
 bool delete_selection();
-bool complexify();
-void random_complexify();
 bool simplify();
 
 void selection_info(int mode);
 void draw_cartesian_plane();
-
-int rand_lim(int limit);
 
 int main(int argc, char** argv)
 {
@@ -391,11 +388,16 @@ void handleKeypress(unsigned char key, int x, int y)
                 break;
             case 'c':
             case 'C':
-                complexify();
+                if (!mesh->complexify())
+                    return;
                 break;
             case 'r':
             case 'R':
-                random_complexify();
+                mesh->random_complexify();
+                break;
+            case 't':
+            case 'T':
+                //triangulate();
                 break;
             case 'm':
             case 'M':
@@ -595,7 +597,7 @@ void handleTerminal()
                 render_mode = RENDER_VBO;
                 break;
             case CMD_COMPLEXIFY:
-                if (!complexify())
+                if (!mesh->complexify())
                 {
                     comp_color = COLOR_ERROR;
                     comp_buff = "Select a face before trying to complexify";
@@ -603,7 +605,7 @@ void handleTerminal()
                 }
                 break;
             case CMD_RAND_COMPLEXIFY:
-                random_complexify();
+                mesh->random_complexify();
                 break;
             default:
                 break;
@@ -874,53 +876,31 @@ bool delete_selection()
     selection_buff.clear();
     return true;
 }
-
-bool complexify()
+/*
+void triangulate()
 {
-    if (!has_face_selected())
-        return false;
-
-    float coords[3] = {0};
-    Face* face_selected = mesh->get_selection()->face;
-
-    for (int v : face_selected->getVerts())
+    for (unsigned int i = 0; i < mesh->getGroups().size(); i++)
     {
-        for (int i = 0; i < 3; i++)
-            coords[i] += mesh->getVerts()[v].getCoords()[i] / face_selected->getVerts().size();
+        Group* curr_group = mesh->getGroupAt(i);
+
+        for (unsigned int j = 0; j < curr_group->getFaces().size(); j++)
+        {
+            Face* curr_face = curr_group->getFaceAt(j);
+
+            if (curr_face->getVerts().size() == 3)
+                continue;
+
+            mesh->get_selection()->group_pos = i;
+            mesh->get_selection()->face_pos = j;
+            mesh->get_selection()->face = curr_face;
+
+            complexify();
+        }
     }
 
-    Vertex centroid = Vertex(coords);
-
-    mesh->addVerts(centroid);
-    
-    for (unsigned int i = 0; i < face_selected->getVerts().size(); i++)
-    {
-        Face* f = new Face();
-
-        f->addVert(face_selected->getVerts()[i]);
-        f->addVert(face_selected->getVerts()[(i+1)%(face_selected->getVerts().size())]);
-        f->addVert(mesh->getVerts().size() - 1);
-
-        mesh->getGroupAt(mesh->get_selection()->group_pos)->addFace(f);
-    }
-
-    mesh->getGroupAt(mesh->get_selection()->group_pos)->eraseFaceAt(mesh->get_selection()->face_pos);
     mesh->clear_selection();
-
-    return true;
 }
-
-void random_complexify()
-{
-    int random_group_index = rand_lim(mesh->getGroups().size() - 1);
-    int random_face_index = rand_lim(mesh->getGroupAt(random_group_index)->getFaces().size() - 1);
-
-    mesh->get_selection()->group_pos = random_group_index;
-    mesh->get_selection()->face_pos = random_face_index;
-    mesh->get_selection()->face = mesh->getGroupAt(random_group_index)->getFaceAt(random_face_index);
-
-    complexify();
-}
+*/
 
 void selection_info(int mode)
 {
@@ -1019,14 +999,3 @@ void draw_cartesian_plane()
     glDisable(GL_LINE_STIPPLE);
 }
 
-int rand_lim(int limit)
-{
-    int divisor = RAND_MAX / (limit + 1);
-    int retval;
-
-    do
-        retval = rand() / divisor;
-    while (retval > limit);
-
-    return retval;
-}
