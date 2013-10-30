@@ -85,6 +85,8 @@ void calculeFps();
 
 void handleResize(int w, int h);
 void handleKeypress(unsigned char key, int x, int y);
+void handle_terminal_keypress(unsigned char key);
+void handle_normal_keypress(unsigned char key);
 void handleMouse(int button, int state, int x, int y);
 void handleSpecialKeys(int key, int x, int y);
 void handlePassiveMotion(int x, int y);
@@ -103,7 +105,7 @@ void processHits (GLint hits, GLuint buffer[]);
 void toggle_terminal();
 void set_mode(int mode);
 bool has_face_selected();
-bool delete_selection();
+bool delete_face_selected();
 
 void selection_info(int mode);
 void draw_cartesian_plane();
@@ -250,8 +252,11 @@ void drawScene()
         display2d(viewmode_buff.c_str(), 10, height - 49, 14, GLUT_BITMAP_HELVETICA_18);
 
         /* selection info */
-        glColor3f(0.980392f, 0.501961f, 0.447059f);
-        display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
+        if (mesh->selection_type())
+        {
+            glColor3f(0.980392f, 0.501961f, 0.447059f);
+            display2d(selection_buff.c_str(), 10, height - 72, 14, GLUT_BITMAP_HELVETICA_18);
+        }
 
         if (cartesian_plane_enabled)
         {
@@ -316,147 +321,154 @@ void handleKeypress(unsigned char key, int x, int y)
     }
 
     if(terminal_mode)
-    {
-        switch(key)
-        {
-            /* backspace */
-            case 8:
-                if(terminal_buff.size())
-                {
-                    terminal_buff.pop_back();
-                    if (terminal_buff.size())
-                        handleAutohelper();
-                    else
-                        comp_buff.clear();
-                }
-                break;
-            /* enter */
-            case 13:
-                handleTerminal();
-                break;
-            /* tab */
-            case 9:
-                handleAutocomplete();
-                handleAutohelper();
-                break;
-            default:
-                terminal_buff += key;
-                handleAutohelper();
-        }
-    }
+        handle_terminal_keypress(key);
     else
+        handle_normal_keypress(key);
+
+    glutPostRedisplay();
+}
+
+void handle_terminal_keypress(unsigned char key)
+{
+    switch(key)
     {
-        switch(key)
-        {
-            case 'a':
-            case 'A':
-                camera->moveSide(1);
-                break;
-            case 's':
-            case 'S':
-                camera->move(-1);
-                break;
-            case 'd':
-            case 'D':
-                camera->moveSide(-1);
-                break;
-            case 'w':
-            case 'W':
-                camera->move(1);
-                break;
-            case 'h':
-            case 'H':
-                if (new_face_mode)
-                    new_face_xyz[0] -= POINT_MOV;
+        /* backspace */
+        case 8:
+            if(terminal_buff.size())
+            {
+                terminal_buff.pop_back();
+                if (terminal_buff.size())
+                    handleAutohelper();
                 else
-                    camera->changeAngle(-0.4);
-                break;
-            case 'l':
-            case 'L':
-                if (new_face_mode)
-                    new_face_xyz[0] += POINT_MOV;
-                else
-                    camera->changeAngle(0.4);
-                break;
-            case 'k':
-            case 'K':
-                if (new_face_mode)
-                    new_face_xyz[1] += POINT_MOV;
-                else
-                    camera->setDirectionY(0.01);
-                break;
-            case 'j':
-            case 'J':
-                if (new_face_mode)
-                    new_face_xyz[1] -= POINT_MOV;
-                else
-                    camera->setDirectionY(-0.01);
-                break;
-            case 'u':
-            case 'U':
-                if (new_face_mode)
-                    new_face_xyz[2] -= POINT_MOV;
-                break;
-            case 'i':
-            case 'I':
-                if (new_face_mode)
-                    new_face_xyz[2] += POINT_MOV;
-                break;
-            case 'f':
-            case 'F':
-                set_mode(MODE_FACE);
-                break;
-            case 'v':
-            case 'V':
-                set_mode(MODE_VERTEX);
-                break;
-            case 'x':
-            case 'X':
-                delete_selection();
-                break;
-            case 'z':
-            case 'Z':
-                break;
-            case 'c':
-            case 'C':
-                if (!mesh->complexify())
-                    return;
-                break;
-            case 'r':
-            case 'R':
-                mesh->random_complexify();
-                break;
-            case 't':
-            case 'T':
-                mesh->triangulate();
-                break;
-            case 'n':
-            case 'N':
-                new_face_mode = !new_face_mode;
-                break;
-            case 'm':
-            case 'M':
-                mesh->mess(); 
-                break;
-            case 'p':
-            case 'P':
-                cartesian_plane_enabled = !cartesian_plane_enabled;
-                break;
-            case 'o':
-            case 'O':
-                camera->moveSide(-1);
-                camera->changeAngle(-3.5);
-                break;
-            case 'q':
-            case 'Q':
-                exit(0);
-                break;
-            case 13:
-                if (new_face_mode)
-                    mesh->render_new_face(new_face_xyz);
-                break;
-        }
-        glutPostRedisplay();
+                    comp_buff.clear();
+            }
+            break;
+            /* enter */
+        case 13:
+            handleTerminal();
+            break;
+            /* tab */
+        case 9:
+            handleAutocomplete();
+            handleAutohelper();
+            break;
+        default:
+            terminal_buff += key;
+            handleAutohelper();
+    }
+}
+
+void handle_normal_keypress(unsigned char key)
+{
+    switch(key)
+    {
+        case 'a':
+        case 'A':
+            camera->moveSide(1);
+            break;
+        case 's':
+        case 'S':
+            camera->move(-1);
+            break;
+        case 'd':
+        case 'D':
+            camera->moveSide(-1);
+            break;
+        case 'w':
+        case 'W':
+            camera->move(1);
+            break;
+        case 'h':
+        case 'H':
+            if (new_face_mode)
+                new_face_xyz[0] -= POINT_MOV;
+            else
+                camera->changeAngle(-0.4);
+            break;
+        case 'l':
+        case 'L':
+            if (new_face_mode)
+                new_face_xyz[0] += POINT_MOV;
+            else
+                camera->changeAngle(0.4);
+            break;
+        case 'k':
+        case 'K':
+            if (new_face_mode)
+                new_face_xyz[1] += POINT_MOV;
+            else
+                camera->setDirectionY(0.01);
+            break;
+        case 'j':
+        case 'J':
+            if (new_face_mode)
+                new_face_xyz[1] -= POINT_MOV;
+            else
+                camera->setDirectionY(-0.01);
+            break;
+        case 'u':
+        case 'U':
+            if (new_face_mode)
+                new_face_xyz[2] -= POINT_MOV;
+            break;
+        case 'i':
+        case 'I':
+            if (new_face_mode)
+                new_face_xyz[2] += POINT_MOV;
+            break;
+        case 'f':
+        case 'F':
+            set_mode(MODE_FACE);
+            break;
+        case 'v':
+        case 'V':
+            set_mode(MODE_VERTEX);
+            break;
+        case 'x':
+        case 'X':
+            delete_face_selected();
+            break;
+        case 'z':
+        case 'Z':
+            break;
+        case 'c':
+        case 'C':
+            if (!mesh->complexify())
+                return;
+            break;
+        case 'r':
+        case 'R':
+            mesh->random_complexify();
+            break;
+        case 't':
+        case 'T':
+            mesh->triangulate();
+            break;
+        case 'n':
+        case 'N':
+            new_face_mode = !new_face_mode;
+            break;
+        case 'm':
+        case 'M':
+            mesh->mess(); 
+            break;
+        case 'p':
+        case 'P':
+            cartesian_plane_enabled = !cartesian_plane_enabled;
+            break;
+        case 'o':
+        case 'O':
+            camera->moveSide(-1);
+            camera->changeAngle(-3.5);
+            break;
+        case 'q':
+        case 'Q':
+            exit(0);
+            break;
+        case 13:
+            if (new_face_mode)
+                mesh->render_new_face(new_face_xyz);
+            break;
     }
 }
 
@@ -591,7 +603,7 @@ void handleTerminal()
                 }
                 break;
             case CMD_DELETE:
-                if (!delete_selection())
+                if (!delete_face_selected())
                 {
                     comp_color = COLOR_ERROR;
                     comp_buff = "Select something before trying to delete..";
@@ -868,8 +880,16 @@ void processHits (GLint hits, GLuint buffer[])
 	}
 	ptr = ptrNames;
 
-    mesh->set_selection(ptr[0], ptr[1]);
-    selection_info(MODE_FACE);
+    if (glMode == GL_POLYGON)
+    {
+        mesh->set_face_selected(ptr[0], ptr[1]);
+        selection_info(MODE_FACE);
+    }
+    else if (glMode == GL_LINE_LOOP)
+    {
+        mesh->set_vertex_selected(ptr[0]);
+        selection_info(MODE_VERTEX);
+    }
 }
 
 void toggle_terminal()
@@ -896,20 +916,17 @@ void set_mode(int mode)
         default:
             break;
     }
+    
+    mesh->clear_selection();
 }
 
-bool has_face_selected()
+bool delete_face_selected()
 {
-    return mesh->get_selection()->face != NULL;
-}
-
-bool delete_selection()
-{
-    if (!has_face_selected())
+    if (mesh->selection_type() != SELECTION_FACE)
         return false;
 
-    mesh->getGroupAt(mesh->get_selection()->group_pos)->eraseFaceAt(mesh->get_selection()->face_pos);
-    mesh->get_selection()->face = NULL; 
+    mesh->getGroupAt(mesh->get_face_selected()->group_pos)->eraseFaceAt(mesh->get_face_selected()->face_pos);
+    mesh->get_face_selected()->face = NULL; 
     selection_buff.clear();
     return true;
 }
@@ -921,8 +938,11 @@ void selection_info(int mode)
     switch (mode)
     {
         case MODE_FACE:
-            v = mesh->get_selection()->face->getVerts().size();
-            selection_buff = "face V: " + to_string(v);
+            if (mesh->get_face_selected()->face != NULL)
+            {
+                v = mesh->get_face_selected()->face->getVerts().size();
+                selection_buff = "face V: " + to_string(v);
+            }
             break;
         default:
             break;

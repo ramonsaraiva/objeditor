@@ -9,6 +9,10 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
+#define SELECTION_NONE      0
+#define SELECTION_FACE      1 
+#define SELECTION_VERTEX    2
+
 using namespace std;
 
 class Mesh{
@@ -26,7 +30,9 @@ class Mesh{
 		vector<Vertex> norms;
 		vector<Texts> texts;
 		map<string, Material*> mats;
-        struct FaceSel selection;
+        struct FaceSel face_selected;
+        int vertex_selected;
+        int selection = SELECTION_NONE;
 
         GLfloat* geometry;
         GLuint* indices;
@@ -50,9 +56,10 @@ class Mesh{
         void upload_to_gpu();
         void render_gpu_data();
 
-        void set_selection(int group, int face);
+        void set_face_selected(int group, int face);
+        void set_vertex_selected(int vertex);
         void clear_selection();
-        bool has_face_selected();
+        int selection_type();
         bool complexify();
         void random_complexify();
         void triangulate();
@@ -70,5 +77,5 @@ class Mesh{
 		vector<Texts> getTexts(void);
 		map<string, Material*> getMats(void);
 		Material* getMtl(string name);
-        FaceSel* get_selection();
+        FaceSel* get_face_selected();
 };

@@ -23,11 +23,19 @@ void Mesh::addMats(Material* newM){
 	}
 }
 
-void Mesh::set_selection(int group, int face)
+void Mesh::set_face_selected(int group, int face)
 {
-    selection.group_pos = group;
-    selection.face_pos = face;
-    selection.face = groups.at(group)->getFaces().at(face); 
+    face_selected.group_pos = group;
+    face_selected.face_pos = face;
+    face_selected.face = groups.at(group)->getFaces().at(face); 
+
+    selection = SELECTION_FACE;
+}
+
+void Mesh::set_vertex_selected(int vertex)
+{
+    vertex_selected = vertex;
+    selection = SELECTION_VERTEX;
 }
 
 vector<Group*> Mesh::getGroups(void){
@@ -58,9 +66,9 @@ Material* Mesh::getMtl(string name){
 	return mats[name];
 }
 
-Mesh::FaceSel* Mesh::get_selection()
+Mesh::FaceSel* Mesh::get_face_selected()
 {
-    return &selection;
+    return &face_selected;
 }
 
 void Mesh::renderVerts(void)
@@ -69,24 +77,21 @@ void Mesh::renderVerts(void)
 
     glColor3f(1.0f, 1.0f, 0.0f);
 	
-	for(Vertex v : verts){
+	for (unsigned int i = 0; i < verts.size(); i++)
+    {
+        if (selection == SELECTION_VERTEX && (int) i == vertex_selected)
+            glColor3f(1.0f, 0.0f, 1.0f);
 				
         glLoadName(vertex_name++);
+
         glBegin(GL_POINTS);
-		
-		glVertex3fv(v.getCoords());
-	
-		// glPushMatrix();
-
-			// glTranslatef(vert[0], vert[1], vert[2]);
-
-			// glutSolidSphere(0.1, 4, 4);
-				
-		// glPopMatrix();
+		glVertex3fv(verts[i].getCoords());
 	    glEnd();
+
+        if (selection == SELECTION_VERTEX && (int) i == vertex_selected)
+            glColor3f(1.0f, 1.0f, 0.0f);
 	}
 }
-
 
 void Mesh::render(int renderMode, int glMode){
 	int group_name = 0;
@@ -96,7 +101,7 @@ void Mesh::render(int renderMode, int glMode){
 	
 	for(Group* g : groups){	
 	
-		if(renderMode == GL_SELECT){
+		if(renderMode == GL_SELECT && glMode == GL_POLYGON){
 			glLoadName(group_name++);
 		}
 		
@@ -122,12 +127,12 @@ void Mesh::render(int renderMode, int glMode){
 		}	
 		
 		int face_name = 0;
-		
+
+        glColor3f(1.0, 1.0, 1.0);
+
 		for(Face* f : g->getFaces()){
-			if (f == selection.face)
+			if (f == face_selected.face)
                 glColor3f(0.603922f, 0.803922f, 0.196078f);
-            else
-                glColor3f(1.0, 1.0, 1.0);
 			
 			vector<int> v = f->getVerts();
 			vector<int> n = f->getNorms();
@@ -138,9 +143,8 @@ void Mesh::render(int renderMode, int glMode){
 			
 			int nv = v.size();
 			
-			if(renderMode == GL_SELECT){
+			if (renderMode == GL_SELECT && glMode == GL_POLYGON)
 				glPushName(face_name++);
-			}
 		
 			glBegin(glMode);
 			
@@ -156,10 +160,11 @@ void Mesh::render(int renderMode, int glMode){
 			
 			glEnd();
 			
-			if(renderMode == GL_SELECT){
+			if (renderMode == GL_SELECT && glMode == GL_POLYGON)
 				glPopName();
-			}
-			
+
+            if (f == face_selected.face)
+                glColor3f(1.0, 1.0, 1.0);
 		}
 	}
 	
@@ -270,42 +275,49 @@ void Mesh::render_gpu_data()
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }
 
-void Mesh::clear_selection() {
-    selection.face = NULL;
+void Mesh::clear_selection()
+{
+    selection = SELECTION_NONE;
+
+    face_selected.group_pos = -1;
+    face_selected.face_pos = -1;
+    face_selected.face = NULL;
+
+    vertex_selected = -1;
 }
 
-bool Mesh::has_face_selected()
+int Mesh::selection_type()
 {
-    return selection.face != NULL;
+    return selection;
 }
 
 bool Mesh::complexify()
 {
-    if (!has_face_selected())
+    if (selection != SELECTION_FACE)
         return false;
 
    float xyz[3] = {0}; 
 
-   for (int v : selection.face->getVerts())
+   for (int v : face_selected.face->getVerts())
        for (int i = 0; i < 3; i++)
-           xyz[i] += verts[v].getCoords()[i] / selection.face->getVerts().size();
+           xyz[i] += verts[v].getCoords()[i] / face_selected.face->getVerts().size();
 
    Vertex centroid = Vertex(xyz);
 
    addVerts(centroid);
 
-   for (unsigned int i = 0; i < selection.face->getVerts().size(); i++)
+   for (unsigned int i = 0; i < face_selected.face->getVerts().size(); i++)
    {
        Face* f = new Face();
 
-       f->addVert(selection.face->getVerts()[i]);
-       f->addVert(selection.face->getVerts()[(i + 1) % (selection.face->getVerts().size())]);
+       f->addVert(face_selected.face->getVerts()[i]);
+       f->addVert(face_selected.face->getVerts()[(i + 1) % (face_selected.face->getVerts().size())]);
        f->addVert(verts.size() - 1);
 
-       groups[selection.group_pos]->addFace(f);
+       groups[face_selected.group_pos]->addFace(f);
    }
 
-   groups[selection.group_pos]->eraseFaceAt(selection.face_pos);
+   groups[face_selected.group_pos]->eraseFaceAt(face_selected.face_pos);
    clear_selection();
 
    return true;
@@ -316,9 +328,9 @@ void Mesh::random_complexify()
     int random_group_index = rand_lim(groups.size() - 1);
     int random_face_index = rand_lim(groups[random_group_index]->getFaces().size() - 1);
 
-    selection.group_pos = random_group_index;
-    selection.face_pos = random_face_index;
-    selection.face = groups[random_group_index]->getFaceAt(random_face_index);
+    face_selected.group_pos = random_group_index;
+    face_selected.face_pos = random_face_index;
+    face_selected.face = groups[random_group_index]->getFaceAt(random_face_index);
 
     complexify();
 }
@@ -350,9 +362,9 @@ void Mesh::triangulate()
     {
         Mesh::FaceSel nat = not_a_triangle.top();
 
-        selection.group_pos = nat.group_pos;
-        selection.face_pos = nat.face_pos;
-        selection.face = nat.face;
+        face_selected.group_pos = nat.group_pos;
+        face_selected.face_pos = nat.face_pos;
+        face_selected.face = nat.face;
 
         not_a_triangle.pop();
 
