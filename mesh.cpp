@@ -422,6 +422,31 @@ void Mesh::render_new_face(float* xyz) {
     groups[groups.size() - 1]->addFace(new_face); 
 }
 
+void Mesh::move_selected_vertex(int side)
+{
+    switch (side)
+    {
+        case MOVE_VERTEX_X_POS:
+            verts[vertex_selected].getCoords()[0] += VERTEX_MOV;
+            break;
+        case MOVE_VERTEX_X_NEG:
+            verts[vertex_selected].getCoords()[0] -= VERTEX_MOV;
+            break;
+        case MOVE_VERTEX_Y_POS:
+            verts[vertex_selected].getCoords()[1] += VERTEX_MOV;
+            break;
+        case MOVE_VERTEX_Y_NEG:
+            verts[vertex_selected].getCoords()[1] -= VERTEX_MOV;
+            break;
+        case MOVE_VERTEX_Z_POS:
+            verts[vertex_selected].getCoords()[2] += VERTEX_MOV;
+            break;
+        case MOVE_VERTEX_Z_NEG:
+            verts[vertex_selected].getCoords()[2] -= VERTEX_MOV;
+            break;
+    }
+}
+
 void Mesh::mess()
 {
    random_shuffle(verts.begin(), verts.end());

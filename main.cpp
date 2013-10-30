@@ -382,6 +382,8 @@ void handle_normal_keypress(unsigned char key)
         case 'H':
             if (new_face_mode)
                 new_face_xyz[0] -= POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_X_NEG);
             else
                 camera->changeAngle(-0.4);
             break;
@@ -389,6 +391,8 @@ void handle_normal_keypress(unsigned char key)
         case 'L':
             if (new_face_mode)
                 new_face_xyz[0] += POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_X_POS);
             else
                 camera->changeAngle(0.4);
             break;
@@ -396,6 +400,8 @@ void handle_normal_keypress(unsigned char key)
         case 'K':
             if (new_face_mode)
                 new_face_xyz[1] += POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_Y_POS);
             else
                 camera->setDirectionY(0.01);
             break;
@@ -403,6 +409,8 @@ void handle_normal_keypress(unsigned char key)
         case 'J':
             if (new_face_mode)
                 new_face_xyz[1] -= POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_Y_NEG);
             else
                 camera->setDirectionY(-0.01);
             break;
@@ -410,11 +418,15 @@ void handle_normal_keypress(unsigned char key)
         case 'U':
             if (new_face_mode)
                 new_face_xyz[2] -= POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_Z_NEG);
             break;
         case 'i':
         case 'I':
             if (new_face_mode)
                 new_face_xyz[2] += POINT_MOV;
+            else if (mesh->selection_type() == SELECTION_VERTEX)
+                mesh->move_selected_vertex(MOVE_VERTEX_Z_POS);
             break;
         case 'f':
         case 'F':

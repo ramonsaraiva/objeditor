@@ -13,6 +13,15 @@
 #define SELECTION_FACE      1 
 #define SELECTION_VERTEX    2
 
+#define MOVE_VERTEX_X_POS   0
+#define MOVE_VERTEX_X_NEG   1
+#define MOVE_VERTEX_Y_POS   2
+#define MOVE_VERTEX_Y_NEG   3
+#define MOVE_VERTEX_Z_POS   4
+#define MOVE_VERTEX_Z_NEG   5
+
+#define VERTEX_MOV          0.1
+
 using namespace std;
 
 class Mesh{
@@ -64,11 +73,11 @@ class Mesh{
         void random_complexify();
         void triangulate();
         void render_new_face(float* xyz);
+        void move_selected_vertex(int side);
 
         void mess();
         int rand_lim(int limit);
         float distance_bet(Vertex v1, Vertex v2);
-
 
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);
