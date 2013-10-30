@@ -184,6 +184,7 @@ void init()
     terminal_cmds["render-vbo"] = CMD_RENDER_VBO;
     terminal_cmds["complexify"] = CMD_COMPLEXIFY;
     terminal_cmds["random-complexify"] = CMD_RAND_COMPLEXIFY;
+    terminal_cmds["triangulate"] = CMD_TRIANGULATE;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
@@ -606,6 +607,9 @@ void handleTerminal()
                 break;
             case CMD_RAND_COMPLEXIFY:
                 mesh->random_complexify();
+                break;
+            case CMD_TRIANGULATE:
+                mesh->triangulate();
                 break;
             default:
                 break;
