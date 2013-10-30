@@ -11,19 +11,24 @@
 #define MODE_FACE       0
 #define MODE_VERTEX     1
 
-#define CMD_EXIT        0
-#define CMD_COMMANDS    6
-#define CMD_DATA_SHOW   7
-#define CMD_DATA_HIDE   8
-#define CMD_FPS_SHOW    1
-#define CMD_FPS_HIDE    2
-#define CMD_OBJ_OPEN    4
-#define CMD_MODE        5
-#define CMD_DELETE      9
-#define CMD_MESS        10
-#define CMD_PLANE_SHOW  11
-#define CMD_PLANE_HIDE  12
-#define CMD_PLANE_SIZE  13
+#define RENDER_NORMAL   0
+#define RENDER_VBO      1
+
+#define CMD_EXIT             0
+#define CMD_COMMANDS         6
+#define CMD_DATA_SHOW        7
+#define CMD_DATA_HIDE        8
+#define CMD_FPS_SHOW         1
+#define CMD_FPS_HIDE         2
+#define CMD_OBJ_OPEN         4
+#define CMD_MODE             5
+#define CMD_DELETE           9
+#define CMD_MESS            10
+#define CMD_PLANE_SHOW      11
+#define CMD_PLANE_HIDE      12
+#define CMD_PLANE_SIZE      13
+#define CMD_RENDER_NORMAL   14
+#define CMD_RENDER_VBO      15
 
 using namespace std;
 
@@ -34,6 +39,8 @@ int glMode = GL_POLYGON;
 
 Mesh* mesh;
 Camera* camera;
+
+int render_mode = RENDER_NORMAL;
 
 int currentTime, frames = 0, timebase;
 
@@ -84,7 +91,10 @@ void processHits (GLint hits, GLuint buffer[]);
 
 void toggle_terminal();
 void set_mode(int mode);
+bool has_face_selected();
 bool delete_selection();
+bool complexify();
+bool simplify();
 
 void selection_info(int mode);
 void draw_cartesian_plane();
@@ -162,6 +172,8 @@ void init()
     terminal_cmds["cplane-show"] = CMD_PLANE_SHOW;
     terminal_cmds["cplane-hide"] = CMD_PLANE_HIDE;
     terminal_cmds["cplane-size"] = CMD_PLANE_SIZE;
+    terminal_cmds["render-normal"] = CMD_RENDER_NORMAL;
+    terminal_cmds["render-vbo"] = CMD_RENDER_VBO;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
@@ -172,9 +184,11 @@ void init()
 void drawScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//mesh->render2(GL_RENDER, glMode);
-    mesh->render_gpu_data();
+    	
+    if (render_mode == RENDER_NORMAL)
+        mesh->render(GL_RENDER, glMode);
+    else if (render_mode == RENDER_VBO)
+        mesh->render_gpu_data();
 
     if (cartesian_plane_enabled)
         draw_cartesian_plane();
@@ -359,6 +373,13 @@ void handleKeypress(unsigned char key, int x, int y)
             case 'X':
                 delete_selection();
                 break;
+            case 'z':
+            case 'Z':
+                break;
+            case 'c':
+            case 'C':
+                complexify();
+                break;
             case 'm':
             case 'M':
                 mesh->mess(); 
@@ -402,32 +423,24 @@ void handleMouse(int button, int state, int x, int y)
             processHits(hits,selectBuf);
     }
     
-    if (button == GLUT_RIGHT_BUTTON)
-    {
-        if (hits == 0)
-        {
-            /* creates a new face */
-        }
-    }
-		
 	glutPostRedisplay();
 }
 
 void handlePassiveMotion(int x, int y)
 {
 	float y2 = (height - y) / (float)height;
-	if (y2 != 0.5 || x != width/2) 
+	if (y2 != 0.5 || x != width/2.0)
 	{
 		if(y2 != 0.5)
 		{
 			camera->setDirectionY(y2 - 0.5);
 		}
-		if(x != width/2)
+		if(x != width/2.0)
 		{
-			camera->changeAngle((x - width/2) / 10);
+			camera->changeAngle((x - width/2.0) / 10.0);
 		}
 		
-		glutWarpPointer(width/2, height/2);
+		glutWarpPointer(width/2.0, height/2.0);
 		glutPostRedisplay();
 	}
 }
@@ -547,7 +560,12 @@ void handleTerminal()
 
                 cartesian_plane_size = atoi(tokens.at(1).c_str());
                 break;
-
+            case CMD_RENDER_NORMAL:
+                render_mode = RENDER_NORMAL;
+                break;
+            case CMD_RENDER_VBO:
+                render_mode = RENDER_VBO;
+                break;
             default:
                 break;
         }
@@ -665,7 +683,8 @@ bool loadOBJ(const char* s)
     if (!Reader::readObj(s, mesh))
         return false;
 
-    mesh->upload_to_gpu();
+    if (render_mode == RENDER_VBO)
+        mesh->upload_to_gpu();
 	
 	int textCount = Material::getTextCount();
 
@@ -738,8 +757,10 @@ int switchSelect(GLuint* selectBuf, int x, int y)
 				  5.0, 5.0, viewport);
 	gluPerspective(45.0, width / (double)height, 0.2, 500.0);
 
-	//mesh->render2(GL_SELECT, glMode);
-    mesh->render_gpu_data();
+    if (render_mode == RENDER_NORMAL)
+        mesh->render(GL_SELECT, glMode);
+    else if (render_mode == RENDER_VBO)
+        mesh->render_gpu_data();
 
 	glMatrixMode (GL_PROJECTION);
 	glPopMatrix ();
@@ -799,14 +820,54 @@ void set_mode(int mode)
     }
 }
 
+bool has_face_selected()
+{
+    return mesh->get_selection()->face != NULL;
+}
+
 bool delete_selection()
 {
-    if (mesh->get_selection()->face == NULL)
+    if (!has_face_selected())
         return false;
 
     mesh->getGroupAt(mesh->get_selection()->group_pos)->eraseFaceAt(mesh->get_selection()->face_pos);
     mesh->get_selection()->face = NULL; 
     selection_buff.clear();
+    return true;
+}
+
+bool complexify()
+{
+    if (!has_face_selected())
+        return false;
+
+    float coords[3] = {0};
+    Face* face_selected = mesh->get_selection()->face;
+
+    for (int v : face_selected->getVerts())
+    {
+        for (int i = 0; i < 3; i++)
+            coords[i] += mesh->getVerts()[v].getCoords()[i] / face_selected->getVerts().size();
+    }
+
+    Vertex centroid = Vertex(coords);
+
+    mesh->addVerts(centroid);
+    
+    for (unsigned int i = 0; i < face_selected->getVerts().size(); i++)
+    {
+        Face* f = new Face();
+
+        f->addVert(face_selected->getVerts()[i]);
+        f->addVert(face_selected->getVerts()[(i+1)%(face_selected->getVerts().size())]);
+        f->addVert(mesh->getVerts().size() - 1);
+
+        mesh->getGroupAt(mesh->get_selection()->group_pos)->addFace(f);
+    }
+
+    mesh->getGroupAt(mesh->get_selection()->group_pos)->eraseFaceAt(mesh->get_selection()->face_pos);
+    mesh->clear_selection();
+
     return true;
 }
 

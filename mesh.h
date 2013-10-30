@@ -42,13 +42,14 @@ class Mesh{
 		void addNorms(Vertex newN);
 		void addTexts(Texts newT);
 		void addMats(Material* newM);
-		void render(int renderMode);
-		void render2(int renderMode, int glMode);
+		void render(int renderMode, int glMode);
 		void renderVerts(void);
         void set_selection(int group, int face);
         void upload_to_gpu();
         void render_gpu_data();
+        void clear_selection();
         void mess();
+
 
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);

@@ -63,85 +63,16 @@ Mesh::FaceSel* Mesh::get_selection()
     return &selection;
 }
 
-void Mesh::render(int renderMode){
-	int group_name = 0;
-	int currentID = 0;
-	
-	glBindTexture(GL_TEXTURE_2D, currentID);
-	
-	for(Group* g : groups){	
-	
-		if(renderMode == GL_SELECT){
-			glLoadName(group_name++);
-		}
-		
-		if(!g->getVisible()){
-			continue;
-		}
-		
-		string mtlName = g->getMtl();
-		
-		if(!mtlName.empty()){
-		
-			Material* mtl = getMtl(mtlName);
-			glMaterialfv(GL_FRONT, GL_SPECULAR, mtl->getSpecular());
-			glMaterialfv(GL_FRONT, GL_AMBIENT, mtl->getAmbient());
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, mtl->getDiffuse());
-			glMaterialf(GL_FRONT, GL_SHININESS, mtl->getShininess());
-			
-			int tID = mtl->getID();
-			if(tID != currentID){
-				currentID = tID;
-				glBindTexture(GL_TEXTURE_2D, currentID);
-			}
-		}	
-		
-		int face_name = 0;
-		
-		for(Face* f : g->getFaces()){
+void Mesh::renderVerts(void)
+{
+    int vertex_name = 0;
 
-			vector<int> v = f->getVerts();
-			vector<int> n = f->getNorms();
-			vector<int> t = f->getTexts();
-			
-			bool hasNorm = !n.empty();
-			bool hasText = !t.empty();
-			
-			int nv = v.size();
-			
-			if(renderMode == GL_SELECT){
-				glPushName(face_name++);
-			}
-		
-			glBegin(GL_POLYGON);
-			
-			for(int x = 0; x < nv; ++x){
-				if(hasNorm) {
-					glNormal3fv(norms[n[x]].getCoords());
-				}
-				if(hasText){
-					glTexCoord2fv(texts[t[x]].getCoords());
-				}
-				glVertex3fv(verts[v[x]].getCoords());
-			}
-			
-			glEnd();
-			
-			if(renderMode == GL_SELECT){
-				glPopName();
-			}
-			
-		}
-	}
-}
-
-void Mesh::renderVerts(void){
-	
-	glBegin(GL_POINTS);
+    glColor3f(1.0f, 1.0f, 0.0f);
 	
 	for(Vertex v : verts){
 				
-		glColor3f(1.0f, 1.0f, 0.0f);
+        glLoadName(vertex_name++);
+        glBegin(GL_POINTS);
 		
 		glVertex3fv(v.getCoords());
 	
@@ -152,12 +83,12 @@ void Mesh::renderVerts(void){
 			// glutSolidSphere(0.1, 4, 4);
 				
 		// glPopMatrix();
+	    glEnd();
 	}
-	glEnd();
 }
 
 
-void Mesh::render2(int renderMode, int glMode){
+void Mesh::render(int renderMode, int glMode){
 	int group_name = 0;
 	int currentID = 0;
 	
@@ -260,7 +191,7 @@ void Mesh::upload_to_gpu()
 
     geometry = new GLfloat[geometry_size];
 
-    for (int i = 0; i < verts.size(); i++)
+    for (unsigned int i = 0; i < verts.size(); i++)
     {
         for (int j = 0; j < 3; j++)
             geometry[it++] = (GLfloat) verts.at(i).getCoords()[j];
@@ -337,6 +268,11 @@ void Mesh::render_gpu_data()
      */
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+}
+
+void Mesh::clear_selection()
+{
+    selection.face = NULL;
 }
 
 void Mesh::mess()
