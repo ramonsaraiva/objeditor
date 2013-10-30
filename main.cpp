@@ -5,6 +5,7 @@
 #include <utility>
 #include <algorithm>
 #include <map>
+#include <time.h>
 
 #define BUFSIZE 512
 
@@ -94,13 +95,18 @@ void set_mode(int mode);
 bool has_face_selected();
 bool delete_selection();
 bool complexify();
+void random_complexify();
 bool simplify();
 
 void selection_info(int mode);
 void draw_cartesian_plane();
 
+int rand_lim(int limit);
+
 int main(int argc, char** argv)
 {
+    srand(time(NULL));
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(width, height);
@@ -871,6 +877,12 @@ bool complexify()
     return true;
 }
 
+void random_complexify()
+{
+
+
+}
+
 void selection_info(int mode)
 {
     int v = 0;
@@ -966,4 +978,16 @@ void draw_cartesian_plane()
     glEnd();
 
     glDisable(GL_LINE_STIPPLE);
+}
+
+int rand_lim(int limit)
+{
+    int divisor = RAND_MAX / (limit + 1);
+    int retval;
+
+    do
+        retval = rand() / divisor;
+    while (retval > limit);
+
+    return retval;
 }
