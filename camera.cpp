@@ -78,3 +78,8 @@ float Camera::getSin(){
 float Camera::getCos(){
 	return cos(angle / 180 * PI);
 }
+
+float* Camera::get_xyz()
+{
+    return i;
+}

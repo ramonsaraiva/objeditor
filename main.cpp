@@ -52,10 +52,13 @@ char s[20];
 
 unsigned int* ids;
 
+float new_face_xyz[3] = {0.0};
+
 bool terminal_mode = false;
 bool fps_enabled = true;
 bool data_enabled = true;
 bool cartesian_plane_enabled = false;
+bool new_face_enabled = false;
 
 float cartesian_plane_size = 9;
 
@@ -99,10 +102,10 @@ void toggle_terminal();
 void set_mode(int mode);
 bool has_face_selected();
 bool delete_selection();
-bool simplify();
 
 void selection_info(int mode);
 void draw_cartesian_plane();
+void draw_new_face_point();
 
 int main(int argc, char** argv)
 {
@@ -203,6 +206,9 @@ void drawScene()
 
     if (cartesian_plane_enabled)
         draw_cartesian_plane();
+
+    if (new_face_enabled)
+        draw_new_face_point();
 	
 	switch2D();
 	//Draw 2D stuff
@@ -399,6 +405,10 @@ void handleKeypress(unsigned char key, int x, int y)
             case 't':
             case 'T':
                 mesh->triangulate();
+                break;
+            case 'n':
+            case 'N':
+                new_face_enabled = !new_face_enabled;
                 break;
             case 'm':
             case 'M':
@@ -978,3 +988,12 @@ void draw_cartesian_plane()
     glDisable(GL_LINE_STIPPLE);
 }
 
+void draw_new_face_point()
+{
+    glPushMatrix();
+
+        glTranslatef(new_face_xyz[0], new_face_xyz[1], new_face_xyz[2]);
+        glutSolidSphere(0.1, 4, 4); 
+
+    glPopMatrix();
+}

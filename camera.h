@@ -17,9 +17,11 @@ class Camera
 
 		Camera();
 		Camera(float init_angle);
+        
 
 		float getSin(void);
 		float getCos(void);
+        float* get_xyz();
 
 		void changeAngle(float angle2);
 		void setDirectionY(float y);

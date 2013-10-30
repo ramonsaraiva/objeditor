@@ -222,7 +222,7 @@ void Mesh::upload_to_gpu()
 
     glGenBuffersARB(1, &geometry_vboid);
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, geometry_vboid);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLfloat) * geometry_size, geometry, GL_DYNAMIC_DRAW_ARB);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLfloat) * geometry_size, geometry, GL_STATIC_DRAW_ARB);
 
     /*
      * setting indices buffer 
