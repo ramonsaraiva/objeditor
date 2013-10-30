@@ -23,4 +23,5 @@ class Group{
 		void setName(string n);
 		void setMtl(string name);
 		void setVisible(bool b);
+        Face* getFaceAt(int i);
 };

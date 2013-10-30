@@ -45,3 +45,8 @@ void Group::setMtl(string name){
 void Group::setVisible(bool v){
 	visible = v;
 }
+
+Face* Group::getFaceAt(int i)
+{
+    return faces[i];
+}

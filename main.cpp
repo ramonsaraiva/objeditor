@@ -386,6 +386,10 @@ void handleKeypress(unsigned char key, int x, int y)
             case 'C':
                 complexify();
                 break;
+            case 'r':
+            case 'R':
+                random_complexify();
+                break;
             case 'm':
             case 'M':
                 mesh->mess(); 
@@ -879,8 +883,14 @@ bool complexify()
 
 void random_complexify()
 {
+    int random_group_index = rand_lim(mesh->getGroups().size() - 1);
+    int random_face_index = rand_lim(mesh->getGroupAt(random_group_index)->getFaces().size() - 1);
 
+    mesh->get_selection()->group_pos = random_group_index;
+    mesh->get_selection()->face_pos = random_face_index;
+    mesh->get_selection()->face = mesh->getGroupAt(random_group_index)->getFaceAt(random_face_index);
 
+    complexify();
 }
 
 void selection_info(int mode)
