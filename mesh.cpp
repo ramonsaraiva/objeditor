@@ -372,7 +372,10 @@ void Mesh::render_new_face(float* xyz) {
         float dist = distance_bet(new_vertex, verts[i]);
 
         if (dist < min_dist)
+        {
+            min_dist = dist;
             vertex_pos_first = i;
+        }
     }
 
     do
@@ -386,7 +389,10 @@ void Mesh::render_new_face(float* xyz) {
         float dist = distance_bet(new_vertex, verts[i]);
 
         if (dist < min_dist && i != vertex_pos_first)
+        {
+            min_dist = dist;
             vertex_pos_second = i;
+        }
     }
 
     addVerts(new_vertex); 
