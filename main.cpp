@@ -7,23 +7,25 @@
 #include <map>
 #include <time.h>
 
-#define BUFSIZE 512
+#define BUFSIZE             512
 
-#define MODE_FACE       0
-#define MODE_VERTEX     1
+#define MODE_FACE           0
+#define MODE_VERTEX         1
 
-#define RENDER_NORMAL   0
-#define RENDER_VBO      1
+#define RENDER_NORMAL       0
+#define RENDER_VBO          1
 
-#define CMD_EXIT             0
-#define CMD_COMMANDS         6
-#define CMD_DATA_SHOW        7
-#define CMD_DATA_HIDE        8
-#define CMD_FPS_SHOW         1
-#define CMD_FPS_HIDE         2
-#define CMD_OBJ_OPEN         4
-#define CMD_MODE             5
-#define CMD_DELETE           9
+#define POINT_MOV           0.1 
+
+#define CMD_EXIT            0
+#define CMD_COMMANDS        6
+#define CMD_DATA_SHOW       7
+#define CMD_DATA_HIDE       8
+#define CMD_FPS_SHOW        1
+#define CMD_FPS_HIDE        2
+#define CMD_OBJ_OPEN        4
+#define CMD_MODE            5
+#define CMD_DELETE          9
 #define CMD_MESS            10
 #define CMD_PLANE_SHOW      11
 #define CMD_PLANE_HIDE      12
@@ -58,7 +60,7 @@ bool terminal_mode = false;
 bool fps_enabled = true;
 bool data_enabled = true;
 bool cartesian_plane_enabled = false;
-bool new_face_enabled = false;
+bool new_face_mode = false;
 
 float cartesian_plane_size = 9;
 
@@ -207,7 +209,7 @@ void drawScene()
     if (cartesian_plane_enabled)
         draw_cartesian_plane();
 
-    if (new_face_enabled)
+    if (new_face_mode)
         draw_new_face_point();
 	
 	switch2D();
@@ -364,19 +366,41 @@ void handleKeypress(unsigned char key, int x, int y)
                 break;
             case 'h':
             case 'H':
-                camera->changeAngle(-0.4);
+                if (new_face_mode)
+                    new_face_xyz[0] -= POINT_MOV;
+                else
+                    camera->changeAngle(-0.4);
                 break;
             case 'l':
             case 'L':
-                camera->changeAngle(0.4);
+                if (new_face_mode)
+                    new_face_xyz[0] += POINT_MOV;
+                else
+                    camera->changeAngle(0.4);
                 break;
             case 'k':
             case 'K':
-                camera->setDirectionY(0.01);
+                if (new_face_mode)
+                    new_face_xyz[1] += POINT_MOV;
+                else
+                    camera->setDirectionY(0.01);
                 break;
             case 'j':
             case 'J':
-                camera->setDirectionY(-0.01);
+                if (new_face_mode)
+                    new_face_xyz[1] -= POINT_MOV;
+                else
+                    camera->setDirectionY(-0.01);
+                break;
+            case 'u':
+            case 'U':
+                if (new_face_mode)
+                    new_face_xyz[2] -= POINT_MOV;
+                break;
+            case 'i':
+            case 'I':
+                if (new_face_mode)
+                    new_face_xyz[2] += POINT_MOV;
                 break;
             case 'f':
             case 'F':
@@ -408,7 +432,7 @@ void handleKeypress(unsigned char key, int x, int y)
                 break;
             case 'n':
             case 'N':
-                new_face_enabled = !new_face_enabled;
+                new_face_mode = !new_face_mode;
                 break;
             case 'm':
             case 'M':
@@ -417,11 +441,6 @@ void handleKeypress(unsigned char key, int x, int y)
             case 'p':
             case 'P':
                 cartesian_plane_enabled = !cartesian_plane_enabled;
-                break;
-            case 'i':
-            case 'I':
-                camera->moveSide(1);
-                camera->changeAngle(3.5);
                 break;
             case 'o':
             case 'O':
@@ -990,10 +1009,12 @@ void draw_cartesian_plane()
 
 void draw_new_face_point()
 {
+    glColor3f(0.780392f, 0.0823529f, 0.521569f);
+
     glPushMatrix();
 
         glTranslatef(new_face_xyz[0], new_face_xyz[1], new_face_xyz[2]);
-        glutSolidSphere(0.1, 4, 4); 
+        glutSolidSphere(0.1, 8, 8); 
 
     glPopMatrix();
 }
