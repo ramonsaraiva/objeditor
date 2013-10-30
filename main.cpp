@@ -63,6 +63,7 @@ string comp_buff;
 string objfile_buff;
 string viewmode_buff;
 string selection_buff;
+string last_terminal_buff;
 
 map<string, int> terminal_cmds;
 vector<string> obj_files;
@@ -79,6 +80,7 @@ void calculeFps();
 void handleResize(int w, int h);
 void handleKeypress(unsigned char key, int x, int y);
 void handleMouse(int button, int state, int x, int y);
+void handleSpecialKeys(int key, int x, int y);
 void handlePassiveMotion(int x, int y);
 void handleTerminal();
 void handleAutohelper();
@@ -123,6 +125,7 @@ int main(int argc, char** argv)
     glutMouseFunc(handleMouse);
     glutReshapeFunc(handleResize);
     glutKeyboardFunc(handleKeypress);
+    glutSpecialFunc(handleSpecialKeys);
     glutPassiveMotionFunc(handlePassiveMotion);
     glutIdleFunc(idle);
 
@@ -440,6 +443,15 @@ void handleMouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
+void handleSpecialKeys(int key, int x, int y)
+{
+    if (!terminal_mode)
+        return;
+
+    if (key == GLUT_KEY_UP)
+        terminal_buff = last_terminal_buff;
+}
+
 void handlePassiveMotion(int x, int y)
 {
 	float y2 = (height - y) / (float)height;
@@ -479,6 +491,8 @@ void handleTerminal()
     }
     else
     {
+        last_terminal_buff = terminal_buff;
+
         switch (terminal_cmds[tokens.front()])
         {
             case CMD_EXIT:
