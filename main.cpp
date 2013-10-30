@@ -451,6 +451,10 @@ void handleKeypress(unsigned char key, int x, int y)
             case 'Q':
                 exit(0);
                 break;
+            case 13:
+                if (new_face_mode)
+                    mesh->render_new_face(new_face_xyz);
+                break;
         }
         glutPostRedisplay();
     }

@@ -56,9 +56,11 @@ class Mesh{
         bool complexify();
         void random_complexify();
         void triangulate();
+        void render_new_face(float* xyz);
 
         void mess();
         int rand_lim(int limit);
+        float distance_bet(Vertex v1, Vertex v2);
 
 
 		Group* getGroupAt(int i);

@@ -360,6 +360,48 @@ void Mesh::triangulate()
     }
 }
 
+void Mesh::render_new_face(float* xyz) {
+    Vertex new_vertex = Vertex(xyz);
+    int vertex_pos_first = 0;
+    int vertex_pos_second = 1;
+    int group_pos = 0;
+
+    float min_dist = distance_bet(new_vertex, verts[vertex_pos_first]);  
+
+    for (unsigned int i = 0; i < groups.size(); i++)
+    {
+        for (unsigned int j = 0; j < groups[i]->getFaces().size(); j++)
+        {
+            Face* curr_face = groups[i]->getFaces()[j];
+
+            for (int vertex : curr_face->getVerts())
+            {
+                float dist = distance_bet(new_vertex, verts[vertex]);
+
+                if (dist < min_dist)
+                {
+                    vertex_pos_second = vertex_pos_first;
+
+                    min_dist = dist;
+                    vertex_pos_first = vertex;
+
+                    group_pos = i;
+                }
+            }
+        }
+    }
+
+    addVerts(new_vertex); 
+
+    Face* new_face = new Face();
+
+    new_face->addVert(verts.size() - 1);
+    new_face->addVert(vertex_pos_first);
+    new_face->addVert(vertex_pos_second);
+
+    groups[group_pos]->addFace(new_face); 
+}
+
 void Mesh::mess()
 {
    random_shuffle(verts.begin(), verts.end());
@@ -375,4 +417,12 @@ int Mesh::rand_lim(int limit)
     while (retval > limit);
 
     return retval;
+}
+
+float Mesh::distance_bet(Vertex v1, Vertex v2)
+{
+    float* v1xyz = v1.getCoords();
+    float* v2xyz = v2.getCoords();
+
+    return sqrt(pow(v2xyz[0] - v1xyz[0], 2) + pow(v2xyz[1] - v1xyz[1], 2) + pow(v2xyz[2] - v2xyz[1], 2));
 }

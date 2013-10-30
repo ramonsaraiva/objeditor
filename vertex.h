@@ -5,7 +5,7 @@ class Vertex{
 
 	public:
 		Vertex(){}
-		Vertex(float c[3]);
+		Vertex(float* c);
 		Vertex(float x, float y, float z);
 		float* getCoords(void);
 };
