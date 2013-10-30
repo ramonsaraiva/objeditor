@@ -98,6 +98,13 @@ void Mesh::render(int renderMode, int glMode){
 	int currentID = 0;
 	
 	glBindTexture(GL_TEXTURE_2D, currentID);
+
+	if (glMode == GL_LINE_LOOP)
+    {
+		renderVerts();
+
+        if (renderMode == GL_SELECT) return;
+	}
 	
 	for(Group* g : groups){	
 	
@@ -168,9 +175,6 @@ void Mesh::render(int renderMode, int glMode){
 		}
 	}
 	
-	if(glMode == GL_LINE_LOOP){
-		renderVerts();
-	}
 }
 
 void Mesh::upload_to_gpu()
