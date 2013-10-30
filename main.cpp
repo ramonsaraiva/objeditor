@@ -107,7 +107,7 @@ void set_mode(int mode);
 bool has_face_selected();
 bool delete_face_selected();
 
-void selection_info(int mode);
+void selection_info();
 void draw_cartesian_plane();
 void draw_new_face_point();
 
@@ -895,12 +895,12 @@ void processHits (GLint hits, GLuint buffer[])
     if (glMode == GL_POLYGON)
     {
         mesh->set_face_selected(ptr[0], ptr[1]);
-        selection_info(MODE_FACE);
+        selection_info();
     }
     else if (glMode == GL_LINE_LOOP)
     {
         mesh->set_vertex_selected(ptr[0]);
-        selection_info(MODE_VERTEX);
+        selection_info();
     }
 }
 
@@ -928,8 +928,6 @@ void set_mode(int mode)
         default:
             break;
     }
-    
-    mesh->clear_selection();
 }
 
 bool delete_face_selected()
@@ -943,18 +941,17 @@ bool delete_face_selected()
     return true;
 }
 
-void selection_info(int mode)
+void selection_info()
 {
     int v = 0;
 
-    switch (mode)
+    switch (mesh->selection_type())
     {
-        case MODE_FACE:
-            if (mesh->get_face_selected()->face != NULL)
-            {
-                v = mesh->get_face_selected()->face->getVerts().size();
-                selection_buff = "face V: " + to_string(v);
-            }
+        case SELECTION_FACE:
+            v = mesh->get_face_selected()->face->getVerts().size();
+            selection_buff = "face V: " + to_string(v);
+            break;
+        case SELECTION_VERTEX:
             break;
         default:
             break;

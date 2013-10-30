@@ -335,6 +335,7 @@ void Mesh::random_complexify()
     face_selected.group_pos = random_group_index;
     face_selected.face_pos = random_face_index;
     face_selected.face = groups[random_group_index]->getFaceAt(random_face_index);
+    selection = SELECTION_FACE;
 
     complexify();
 }
