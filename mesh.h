@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include <stack>
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -54,6 +55,7 @@ class Mesh{
         bool has_face_selected();
         bool complexify();
         void random_complexify();
+        void triangulate();
 
         void mess();
         int rand_lim(int limit);

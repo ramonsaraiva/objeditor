@@ -323,6 +323,43 @@ void Mesh::random_complexify()
     complexify();
 }
 
+void Mesh::triangulate()
+{
+    stack<Mesh::FaceSel> not_a_triangle;
+
+    for (unsigned int i = 0; i < groups.size(); i++)
+    {
+        for (unsigned int j = 0; j < groups[i]->getFaces().size(); j++)
+        {
+            Face* curr_face = groups[i]->getFaceAt(j);
+
+            if (curr_face->getVerts().size() == 3)
+                continue;
+
+            Mesh::FaceSel sel;
+
+            sel.group_pos = i;
+            sel.face_pos = j;
+            sel.face = curr_face;
+
+            not_a_triangle.push(sel); 
+        }
+    }
+
+    while (!not_a_triangle.empty())
+    {
+        Mesh::FaceSel nat = not_a_triangle.top();
+
+        selection.group_pos = nat.group_pos;
+        selection.face_pos = nat.face_pos;
+        selection.face = nat.face;
+
+        not_a_triangle.pop();
+
+        complexify();
+    }
+}
+
 void Mesh::mess()
 {
    random_shuffle(verts.begin(), verts.end());

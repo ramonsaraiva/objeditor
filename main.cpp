@@ -397,7 +397,7 @@ void handleKeypress(unsigned char key, int x, int y)
                 break;
             case 't':
             case 'T':
-                //triangulate();
+                mesh->triangulate();
                 break;
             case 'm':
             case 'M':
@@ -876,31 +876,6 @@ bool delete_selection()
     selection_buff.clear();
     return true;
 }
-/*
-void triangulate()
-{
-    for (unsigned int i = 0; i < mesh->getGroups().size(); i++)
-    {
-        Group* curr_group = mesh->getGroupAt(i);
-
-        for (unsigned int j = 0; j < curr_group->getFaces().size(); j++)
-        {
-            Face* curr_face = curr_group->getFaceAt(j);
-
-            if (curr_face->getVerts().size() == 3)
-                continue;
-
-            mesh->get_selection()->group_pos = i;
-            mesh->get_selection()->face_pos = j;
-            mesh->get_selection()->face = curr_face;
-
-            complexify();
-        }
-    }
-
-    mesh->clear_selection();
-}
-*/
 
 void selection_info(int mode)
 {
