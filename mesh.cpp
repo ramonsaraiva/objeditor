@@ -362,33 +362,31 @@ void Mesh::triangulate()
 
 void Mesh::render_new_face(float* xyz) {
     Vertex new_vertex = Vertex(xyz);
-    int vertex_pos_first = 0;
-    int vertex_pos_second = 1;
-    int group_pos = 0;
+    unsigned int vertex_pos_first = 0;
+    unsigned int vertex_pos_second;
 
     float min_dist = distance_bet(new_vertex, verts[vertex_pos_first]);  
 
-    for (unsigned int i = 0; i < groups.size(); i++)
+    for (unsigned int i = 1; i < verts.size(); i++)
     {
-        for (unsigned int j = 0; j < groups[i]->getFaces().size(); j++)
-        {
-            Face* curr_face = groups[i]->getFaces()[j];
+        float dist = distance_bet(new_vertex, verts[i]);
 
-            for (int vertex : curr_face->getVerts())
-            {
-                float dist = distance_bet(new_vertex, verts[vertex]);
+        if (dist < min_dist)
+            vertex_pos_first = i;
+    }
 
-                if (dist < min_dist)
-                {
-                    vertex_pos_second = vertex_pos_first;
+    do
+        vertex_pos_second = rand_lim(verts.size());
+    while (vertex_pos_second == vertex_pos_first);
 
-                    min_dist = dist;
-                    vertex_pos_first = vertex;
+    min_dist = distance_bet(new_vertex, verts[vertex_pos_second]);
 
-                    group_pos = i;
-                }
-            }
-        }
+    for (unsigned int i = 0; i < verts.size(); i++)
+    {
+        float dist = distance_bet(new_vertex, verts[i]);
+
+        if (dist < min_dist && i != vertex_pos_first)
+            vertex_pos_second = i;
     }
 
     addVerts(new_vertex); 
@@ -399,7 +397,7 @@ void Mesh::render_new_face(float* xyz) {
     new_face->addVert(vertex_pos_first);
     new_face->addVert(vertex_pos_second);
 
-    groups[group_pos]->addFace(new_face); 
+    groups[groups.size() - 1]->addFace(new_face); 
 }
 
 void Mesh::mess()
