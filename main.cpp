@@ -30,6 +30,8 @@
 #define CMD_PLANE_SIZE      13
 #define CMD_RENDER_NORMAL   14
 #define CMD_RENDER_VBO      15
+#define CMD_COMPLEXIFY      16
+#define CMD_RAND_COMPLEXIFY 17
 
 using namespace std;
 
@@ -180,6 +182,8 @@ void init()
     terminal_cmds["cplane-size"] = CMD_PLANE_SIZE;
     terminal_cmds["render-normal"] = CMD_RENDER_NORMAL;
     terminal_cmds["render-vbo"] = CMD_RENDER_VBO;
+    terminal_cmds["complexify"] = CMD_COMPLEXIFY;
+    terminal_cmds["random-complexify"] = CMD_RAND_COMPLEXIFY;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
@@ -575,6 +579,17 @@ void handleTerminal()
                 break;
             case CMD_RENDER_VBO:
                 render_mode = RENDER_VBO;
+                break;
+            case CMD_COMPLEXIFY:
+                if (!complexify())
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Select a face before trying to complexify";
+                    return;
+                }
+                break;
+            case CMD_RAND_COMPLEXIFY:
+                random_complexify();
                 break;
             default:
                 break;
