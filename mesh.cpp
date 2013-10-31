@@ -370,6 +370,7 @@ void Mesh::triangulate()
         face_selected.group_pos = nat.group_pos;
         face_selected.face_pos = nat.face_pos;
         face_selected.face = nat.face;
+        selection = SELECTION_FACE;
 
         not_a_triangle.pop();
 
