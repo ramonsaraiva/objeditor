@@ -25,6 +25,7 @@
 #define CMD_FPS_SHOW        1
 #define CMD_FPS_HIDE        2
 #define CMD_OBJ_OPEN        4
+#define CMD_OBJ_ADD         20
 #define CMD_MODE            5
 #define CMD_DELETE          9
 #define CMD_MESS            10
@@ -36,6 +37,7 @@
 #define CMD_COMPLEXIFY      16
 #define CMD_RAND_COMPLEXIFY 17
 #define CMD_TRIANGULATE     18
+#define CMD_CREATE          19
 
 using namespace std;
 
@@ -183,6 +185,7 @@ void init()
     terminal_cmds["fps-show"] = CMD_FPS_SHOW;
     terminal_cmds["fps-hide"] = CMD_FPS_HIDE;
     terminal_cmds["obj-open"] = CMD_OBJ_OPEN;
+    terminal_cmds["obj-add"] = CMD_OBJ_ADD;
     terminal_cmds["mode"] = CMD_MODE;
     terminal_cmds["delete"] = CMD_DELETE;
     terminal_cmds["mess"] = CMD_MESS;
@@ -194,6 +197,7 @@ void init()
     terminal_cmds["complexify"] = CMD_COMPLEXIFY;
     terminal_cmds["random-complexify"] = CMD_RAND_COMPLEXIFY;
     terminal_cmds["triangulate"] = CMD_TRIANGULATE;
+    terminal_cmds["create"] = CMD_CREATE;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
@@ -204,19 +208,21 @@ void init()
 void drawScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    	
+    
     for (auto object : objects)
     {
-        glPushMatrix();
-
+        /*
         float* trans = object.second->get_translate();
         float* rot = object.second->get_rotate();
         float* sca = object.second->get_scale();
+        */
+
+        glPushMatrix();
 
         /*
-        glTranslatef(trans[0], trans[1], trans[2]);
-        glRotatef(90, rot[0], rot[1], rot[2]);
         glScalef(sca[0], sca[1], sca[2]);
+        glRotatef(90, rot[0], rot[1], rot[2]);
+        glTranslatef(trans[0], trans[1], trans[2]);
         */
 
         if (render_mode == RENDER_NORMAL)
@@ -290,12 +296,11 @@ void drawScene()
         }
     }
 
-	//Go back to 3D
-	camera->resetView(width, height);
+    camera->resetView(width, height);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
+
 	
-    //Buffer swap
 	glutSwapBuffers();
     glFlush();
 }
@@ -572,7 +577,7 @@ void handleTerminal()
     {
         last_terminal_buff = terminal_buff;
 
-        switch (terminal_cmds[tokens.front()])
+        switch (terminal_cmds.at(tokens.front()))
         {
             case CMD_EXIT:
                 exit(0);
@@ -613,6 +618,8 @@ void handleTerminal()
                     comp_color = COLOR_ERROR;
                     comp_buff = "Object \"" + tokens.at(1) + "\" not found";
                 }
+                break;
+            case CMD_OBJ_ADD:
                 break;
             case CMD_MODE:
                 if (!(tokens.size() == 2))
@@ -687,6 +694,9 @@ void handleTerminal()
             case CMD_TRIANGULATE:
                 current_mesh->triangulate();
                 break;
+            case CMD_CREATE:
+                new_face_mode = true;
+                break;
             default:
                 break;
         }
@@ -733,7 +743,7 @@ void handleAutohelper()
     }
     else if (tokens.size() > 1)
     {
-        if (terminal_cmds[tokens.front()] == CMD_OBJ_OPEN)
+        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN)
         {
             for (string obj_file : obj_files)
             {
@@ -779,7 +789,7 @@ void handleAutocomplete()
     }
     else if (tokens.size() > 1)
     {
-        if (terminal_cmds[tokens.front()] == CMD_OBJ_OPEN)
+        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN)
         {
             for (string obj_file : obj_files)
             {
@@ -839,7 +849,6 @@ bool loadOBJ(const char* s)
 	}
 
     objects.insert(pair<Mesh*, Transform*>(mesh, transform));
-    cout << objects.size() << endl;
     current_mesh = mesh;
 
     return true;
