@@ -1026,7 +1026,7 @@ void draw_cartesian_plane()
 
     glPushMatrix();
 
-    if (current_mesh->selection_type() == SELECTION_VERTEX)
+    if (current_mesh->selection_type() == SELECTION_VERTEX && glMode == GL_LINE_LOOP)
     {
         float* xyz = current_mesh->get_selected_vertex_xyz();
         glTranslatef(xyz[0], xyz[1], xyz[2]);
