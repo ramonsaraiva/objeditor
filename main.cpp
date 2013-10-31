@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "reader.h"
+#include "transform.h"
 #include <stdio.h> 
 #include <string.h>
 #include <utility>
@@ -43,7 +44,7 @@ int height = 600;
 
 int glMode = GL_POLYGON;
 
-vector<Mesh*> meshes;
+map<Mesh*, Transform*> objects;
 Mesh* current_mesh;
 Camera* camera;
 
@@ -204,14 +205,24 @@ void drawScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     	
-    for (Mesh* m : meshes)
+    for (auto object : objects)
     {
         glPushMatrix();
 
+        float* trans = object.second->get_translate();
+        float* rot = object.second->get_rotate();
+        float* sca = object.second->get_scale();
+
+        /*
+        glTranslatef(trans[0], trans[1], trans[2]);
+        glRotatef(90, rot[0], rot[1], rot[2]);
+        glScalef(sca[0], sca[1], sca[2]);
+        */
+
         if (render_mode == RENDER_NORMAL)
-            m->render(GL_RENDER, glMode);
+            object.first->render(GL_RENDER, glMode);
         else if (render_mode == RENDER_VBO)
-            m->render_gpu_data();
+            object.first->render_gpu_data();
 
         glPopMatrix();
     }
@@ -788,6 +799,13 @@ void handleAutocomplete()
 bool loadOBJ(const char* s)
 {
 	Mesh* mesh = new Mesh();
+
+    float trans[] = {0.0f, 0.0f, 0.0f};
+    float rot[] = {0.0f, 0.0f, 0.0f};
+    float sca[] = {1.0f, 1.0f, 1.0f};
+
+    Transform* transform = new Transform(trans, rot, sca);
+
 	Material::setTextCount(0);
 	
     if (!Reader::readObj(s, mesh))
@@ -820,7 +838,8 @@ bool loadOBJ(const char* s)
 		}
 	}
 
-    meshes.push_back(mesh);
+    objects.insert(pair<Mesh*, Transform*>(mesh, transform));
+    cout << objects.size() << endl;
     current_mesh = mesh;
 
     return true;
