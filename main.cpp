@@ -703,8 +703,7 @@ void handleTerminal()
                     comp_color = COLOR_ERROR;
                     comp_buff = "Select a face before trying to complexify";
                     return;
-                }
-                break;
+                } break;
             case CMD_RAND_COMPLEXIFY:
                 current_mesh->random_complexify();
                 break;
@@ -1025,6 +1024,16 @@ void draw_cartesian_plane()
     /* X positive and negative lines */
     glColor3f(1.0f, 0.0f, 0.0f);
 
+    glPushMatrix();
+
+    if (current_mesh->selection_type() == SELECTION_VERTEX)
+    {
+        float* xyz = current_mesh->get_selected_vertex_xyz();
+        glTranslatef(xyz[0], xyz[1], xyz[2]);
+    }
+    else
+        glTranslatef(0.0f, 0.0f, 0.0f);
+
     glDisable(GL_LINE_STIPPLE);
 
     glBegin(GL_LINES);
@@ -1098,6 +1107,8 @@ void draw_cartesian_plane()
     glEnd();
 
     glDisable(GL_LINE_STIPPLE);
+
+    glPopMatrix();
 }
 
 void draw_new_face_point()

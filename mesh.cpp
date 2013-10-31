@@ -71,6 +71,11 @@ Mesh::FaceSel* Mesh::get_face_selected()
     return &face_selected;
 }
 
+float* Mesh::get_selected_vertex_xyz()
+{
+    return verts[vertex_selected].getCoords();
+}
+
 void Mesh::renderVerts(void)
 {
     int vertex_name = 0;

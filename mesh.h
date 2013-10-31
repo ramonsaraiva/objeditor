@@ -87,4 +87,5 @@ class Mesh{
 		map<string, Material*> getMats(void);
 		Material* getMtl(string name);
         FaceSel* get_face_selected();
+        float* get_selected_vertex_xyz();
 };
