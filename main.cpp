@@ -18,6 +18,9 @@
 
 #define POINT_MOV           0.1 
 
+#define LOAD_CLEAR          0
+#define LOAD_ADD            1
+
 #define CMD_EXIT            0
 #define CMD_COMMANDS        6
 #define CMD_DATA_SHOW       7
@@ -98,7 +101,7 @@ void handleTerminal();
 void handleAutohelper();
 void handleAutocomplete();
 
-bool loadOBJ(const char* s);
+bool loadOBJ(const char* s, int mode);
 
 void switch2D(void);
 void display2d(const char* msg, float x, float y, float l_size, void* font);
@@ -174,7 +177,7 @@ void init()
     camera = new Camera(90);
     camera->resetView(width, height);
 
-    loadOBJ("obj/cube.obj");
+    loadOBJ("obj/cube.obj", LOAD_CLEAR);
 
     timebase = glutGet(GLUT_ELAPSED_TIME);
 
@@ -611,7 +614,7 @@ void handleTerminal()
                     return;
                 }
 
-                if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str()))
+                if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_CLEAR))
                     objfile_buff = tokens.at(1);
                 else
                 {
@@ -620,6 +623,20 @@ void handleTerminal()
                 }
                 break;
             case CMD_OBJ_ADD:
+                if (!(tokens.size() == 2))
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Wrong parameters. Usage: obj-open [OBJ]";
+                    return;
+                }
+
+                if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_ADD))
+                    objfile_buff = tokens.at(1);
+                else
+                {
+                    comp_color = COLOR_ERROR;
+                    comp_buff = "Object \"" + tokens.at(1) + "\" not found";
+                }
                 break;
             case CMD_MODE:
                 if (!(tokens.size() == 2))
@@ -806,8 +823,14 @@ void handleAutocomplete()
     }
 }
 
-bool loadOBJ(const char* s)
+bool loadOBJ(const char* s, int mode)
 {
+    if (mode == LOAD_CLEAR)
+    {
+        objects.clear();
+	    Material::setTextCount(0);
+    }
+
 	Mesh* mesh = new Mesh();
 
     float trans[] = {0.0f, 0.0f, 0.0f};
@@ -815,8 +838,6 @@ bool loadOBJ(const char* s)
     float sca[] = {1.0f, 1.0f, 1.0f};
 
     Transform* transform = new Transform(trans, rot, sca);
-
-	Material::setTextCount(0);
 	
     if (!Reader::readObj(s, mesh))
         return false;
