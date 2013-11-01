@@ -78,7 +78,6 @@ float cartesian_plane_size = 9;
 
 string terminal_buff;
 string comp_buff;
-string objfile_buff;
 string viewmode_buff;
 string selection_buff;
 string last_terminal_buff;
@@ -193,6 +192,7 @@ void init()
     camera->resetView(width, height);
 
     loadOBJ("obj/cube.obj", LOAD_CLEAR);
+    current_mesh->set_name("cube");
 
     timebase = glutGet(GLUT_ELAPSED_TIME);
 
@@ -218,7 +218,6 @@ void init()
     terminal_cmds["create"] = CMD_CREATE;
     terminal_cmds["unselect"] = CMD_UNSELECT;
 
-    objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
 
     obj_files = {"cat", "cone", "cow", "cube", "horse", "parthenon", "pyramid", "rabbit", "sphere", "teapot", "torreDiPisa", "whale"};
@@ -292,7 +291,7 @@ void drawScene()
 
         /* obj file */
         glColor3f(0.180392f, 0.545098f, 0.341176f);
-        display2d(objfile_buff.c_str(), 10, height - 26, 14, GLUT_BITMAP_HELVETICA_18);
+        display2d(current_mesh->get_name().c_str(), 10, height - 26, 14, GLUT_BITMAP_HELVETICA_18);
 
         /* view mode */
         glColor3f(0.254902f, 0.411765f, 0.882353f);
@@ -526,13 +525,11 @@ void handle_normal_keypress(unsigned char key)
             if (new_face_mode)
                 current_mesh->render_new_face(new_face_xyz);
             break;
-        case '[':
-        case '{':
-            switch_object(SWITCH_NEXT);
-            break;
-        case ']':
-        case '}':
+        case '1':
             switch_object(SWITCH_PREV);
+            break;
+        case '2':
+            switch_object(SWITCH_NEXT);
             break;
     }
 }
@@ -656,7 +653,7 @@ void handleTerminal()
                 }
 
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_CLEAR))
-                    objfile_buff = tokens.at(1);
+                    current_mesh->set_name(tokens.at(1));
                 else
                 {
                     comp_color = COLOR_ERROR;
@@ -679,7 +676,7 @@ void handleTerminal()
                 }
 
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_ADD))
-                    objfile_buff = tokens.at(1);
+                    current_mesh->set_name(tokens.at(1));
                 else
                 {
                     comp_color = COLOR_ERROR;
@@ -798,7 +795,7 @@ void handleAutohelper()
             comp_color = COLOR_INFO;
             comp_buff = buff;
 
-            if (terminal_buff.substr(0, 8) == "obj-open")
+            if (terminal_buff.substr(0, 8) == "obj-open" || terminal_buff.substr(0, 7) == "obj-add")
             {
                 comp_color = COLOR_INFO;
                 comp_buff.clear();
@@ -810,7 +807,7 @@ void handleAutohelper()
     }
     else if (tokens.size() > 1)
     {
-        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN)
+        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN || terminal_cmds.find(tokens.front())->second == CMD_OBJ_ADD)
         {
             for (string obj_file : obj_files)
             {
@@ -856,7 +853,7 @@ void handleAutocomplete()
     }
     else if (tokens.size() > 1)
     {
-        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN)
+        if (terminal_cmds.find(tokens.front())->second == CMD_OBJ_OPEN || terminal_cmds.find(tokens.front())->second == CMD_OBJ_ADD)
         {
             for (string obj_file : obj_files)
             {
@@ -965,7 +962,7 @@ int switchSelect(GLuint* selectBuf, int x, int y)
 	glLoadIdentity ();
 	
 	gluPickMatrix ((GLdouble) x, (GLdouble) (viewport[3] - y), 
-				  5.0, 5.0, viewport);
+				  10.0, 10.0, viewport);
 	gluPerspective(45.0, width / (double)height, 0.2, 500.0);
 
     if (render_mode == RENDER_NORMAL)
@@ -1054,12 +1051,17 @@ void switch_object(int it)
 {
     auto curr = objects.find(current_mesh);
 
+    cout << "curr: " << &curr << endl;
+
     if (it == SWITCH_NEXT)
     {
-        if (curr == objects.end())
+        if (curr == --objects.end())
             return;
 
         curr = std::next(curr);
+
+        cout << "next: " << &curr << endl;
+
         current_mesh = curr->first;
     }
     else
@@ -1068,21 +1070,24 @@ void switch_object(int it)
             return;
 
         curr = std::prev(curr);
+
+        cout << "prev: " << &curr << endl;
+
         current_mesh = curr->first;
     }
+
+
 }
 
 void selection_info()
 {
-    int v = 0;
-
     switch (current_mesh->selection_type())
     {
         case SELECTION_FACE:
-            v = current_mesh->get_face_selected()->face->getVerts().size();
-            selection_buff = "face V: " + to_string(v);
+            selection_buff = "face";
             break;
         case SELECTION_VERTEX:
+            selection_buff = "vertex";
             break;
         default:
             break;

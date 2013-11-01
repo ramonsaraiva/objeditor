@@ -34,6 +34,7 @@ class Mesh{
         };
 
 	private:
+        string name;
 		vector<Group*> groups;
 		vector<Vertex> verts;
 		vector<Vertex> norms;
@@ -53,6 +54,7 @@ class Mesh{
         GLuint indices_vboid;
 
 	public:
+        void set_name(string n);
 		void addGroup(Group* newGroup);
 		void addVerts(Vertex newV);
 		void addNorms(Vertex newN);
@@ -79,6 +81,7 @@ class Mesh{
         int rand_lim(int limit);
         float distance_bet(Vertex v1, Vertex v2);
 
+        string get_name();
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);
 		vector<Vertex> getVerts(void);

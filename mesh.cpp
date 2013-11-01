@@ -1,5 +1,10 @@
 #include "mesh.h" 
 
+void Mesh::set_name(string n)
+{
+    name = n;
+}
+
 void Mesh::addGroup(Group* newGroup){
 	groups.push_back(newGroup);
 }
@@ -36,6 +41,11 @@ void Mesh::set_vertex_selected(int vertex)
 {
     vertex_selected = vertex;
     selection = SELECTION_VERTEX;
+}
+
+string Mesh::get_name()
+{
+    return name;
 }
 
 vector<Group*> Mesh::getGroups(void){
