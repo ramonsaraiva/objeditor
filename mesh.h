@@ -71,6 +71,7 @@ class Mesh{
         void set_vertex_selected(int vertex);
         void clear_selection();
         int selection_type();
+        void delete_selected_face();
         bool complexify();
         void random_complexify();
         void triangulate();

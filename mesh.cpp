@@ -310,6 +310,12 @@ int Mesh::selection_type()
     return selection;
 }
 
+void Mesh::delete_selected_face()
+{
+    groups[face_selected.group_pos]->eraseFaceAt(face_selected.face_pos);
+    clear_selection();
+}
+
 bool Mesh::complexify()
 {
     if (selection != SELECTION_FACE)

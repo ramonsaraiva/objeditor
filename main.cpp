@@ -483,7 +483,8 @@ void handle_normal_keypress(unsigned char key)
             break;
         case 'x':
         case 'X':
-            delete_face_selected();
+            if (current_mesh->selection_type() == SELECTION_FACE)
+                current_mesh->delete_selected_face();
             break;
         case 'z':
         case 'Z':
@@ -504,6 +505,8 @@ void handle_normal_keypress(unsigned char key)
         case 'n':
         case 'N':
             new_face_mode = !new_face_mode;
+            if (new_face_mode)
+                current_mesh->clear_selection();
             break;
         case 'm':
         case 'M':
@@ -661,10 +664,10 @@ void handleTerminal()
                 }
                 break;
             case CMD_OBJ_ADD:
-                if (!(tokens.size() == 11))
+                if (!(tokens.size() == 9))
                 {
                     comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [sX] [sY] [sZ]";
+                    comp_buff = "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s]";
                     return;
                 }
 
@@ -672,8 +675,9 @@ void handleTerminal()
                 {
                     translate_buff[i] = atof(tokens[i+2].c_str());
                     rotate_buff[i] = atof(tokens[i+5].c_str());
-                    scale_buff[i] = atof(tokens[i+8].c_str());
+                    scale_buff[i] = atof(tokens[8].c_str());
                 }
+
 
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_ADD))
                     current_mesh->set_name(tokens.at(1));
@@ -703,12 +707,14 @@ void handleTerminal()
                 }
                 break;
             case CMD_DELETE:
-                if (!delete_face_selected())
+                if (current_mesh->selection_type() != SELECTION_FACE)
                 {
                     comp_color = COLOR_ERROR;
                     comp_buff = "Select something before trying to delete..";
                     return;
                 }
+
+                current_mesh->delete_selected_face();
                 break;
             case CMD_MESS:
                 current_mesh->mess();
@@ -1036,22 +1042,9 @@ void set_mode(int mode)
     }
 }
 
-bool delete_face_selected()
-{
-    if (current_mesh->selection_type() != SELECTION_FACE)
-        return false;
-
-    current_mesh->getGroupAt(current_mesh->get_face_selected()->group_pos)->eraseFaceAt(current_mesh->get_face_selected()->face_pos);
-    current_mesh->get_face_selected()->face = NULL; 
-    selection_buff.clear();
-    return true;
-}
-
 void switch_object(int it)
 {
     auto curr = objects.find(current_mesh);
-
-    cout << "curr: " << &curr << endl;
 
     if (it == SWITCH_NEXT)
     {
@@ -1059,9 +1052,6 @@ void switch_object(int it)
             return;
 
         curr = std::next(curr);
-
-        cout << "next: " << &curr << endl;
-
         current_mesh = curr->first;
     }
     else
@@ -1070,9 +1060,6 @@ void switch_object(int it)
             return;
 
         curr = std::prev(curr);
-
-        cout << "prev: " << &curr << endl;
-
         current_mesh = curr->first;
     }
 
