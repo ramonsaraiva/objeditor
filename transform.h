@@ -6,7 +6,7 @@ class Transform
         float* scale;
 
         bool rotation = false;
-        float rotation_angle = 90.0;
+        float rotation_angle = 0.0;
 
     public:
         Transform(float* trans, float* rot, float* sca);

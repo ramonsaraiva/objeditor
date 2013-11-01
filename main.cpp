@@ -21,6 +21,9 @@
 #define LOAD_CLEAR          0
 #define LOAD_ADD            1
 
+#define SWITCH_PREV         0
+#define SWITCH_NEXT         1
+
 #define CMD_EXIT            0
 #define CMD_COMMANDS        6
 #define CMD_DATA_SHOW       7
@@ -85,6 +88,14 @@ vector<string> obj_files;
 static GLfloat COLOR_ERROR[] = {1.0f, 0.388235f, 0.278431f};
 static GLfloat COLOR_INFO[] = {0.690196f, 0.768627f, 0.870588f};
 GLfloat* comp_color = COLOR_ERROR;
+
+float translate_buff_i[] = {0.0f, 0.0f, 0.0f};
+float rotate_buff_i[] = {1.0f, 0.0f, 0.0f};
+float scale_buff_i[] = {1.0f, 1.0f, 1.0f};
+
+float translate_buff[] = {0.0f, 0.0f, 0.0f};
+float rotate_buff[] = {1.0f, 0.0f, 0.0f};
+float scale_buff[] = {1.0f, 1.0f, 1.0f};
 
 void init();
 void drawScene();
@@ -222,16 +233,16 @@ void drawScene()
 
         glPushMatrix();
 
-        glRotatef(object.second->get_rotation_angle(), rot[0], rot[1], rot[2]);
-        glTranslatef(trans[0], trans[1], trans[2]);
-        glScalef(sca[0], sca[1], sca[2]);
-
         if (object.second->is_rotating())
         {
-            glRotatef(object.second->get_rotation_angle(), 1.0f, 1.0f, 0.0f);
-            glTranslatef(0.0f, 0.0f, 0.0f);
+            glRotatef(object.second->get_rotation_angle(), rot[0], rot[1], rot[2]);
             object.second->inc_rotation_angle(0.5);
         }
+        else
+            glRotatef(0, rot[0], rot[1], rot[2]);
+
+        glTranslatef(trans[0], trans[1], trans[2]);
+        glScalef(sca[0], sca[1], sca[2]);
 
         if (render_mode == RENDER_NORMAL)
             object.first->render(GL_RENDER, glMode);
@@ -412,53 +423,53 @@ void handle_normal_keypress(unsigned char key)
             break;
         case 'h':
         case 'H':
-            if (new_face_mode)
-                new_face_xyz[0] -= POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_X_NEG);
+            else if (new_face_mode)
+                new_face_xyz[0] -= POINT_MOV;
             else
                 camera->changeAngle(-0.4);
             break;
         case 'l':
         case 'L':
-            if (new_face_mode)
-                new_face_xyz[0] += POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_X_POS);
+            else if (new_face_mode)
+                new_face_xyz[0] += POINT_MOV;
             else
                 camera->changeAngle(0.4);
             break;
         case 'k':
         case 'K':
-            if (new_face_mode)
-                new_face_xyz[1] += POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_Y_POS);
+            else if (new_face_mode)
+                new_face_xyz[1] += POINT_MOV;
             else
                 camera->setDirectionY(0.01);
             break;
         case 'j':
         case 'J':
-            if (new_face_mode)
-                new_face_xyz[1] -= POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_Y_NEG);
+            else if (new_face_mode)
+                new_face_xyz[1] -= POINT_MOV;
             else
                 camera->setDirectionY(-0.01);
             break;
         case 'u':
         case 'U':
-            if (new_face_mode)
-                new_face_xyz[2] -= POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_Z_NEG);
+            else if (new_face_mode)
+                new_face_xyz[2] -= POINT_MOV;
             break;
         case 'i':
         case 'I':
-            if (new_face_mode)
-                new_face_xyz[2] += POINT_MOV;
-            else if (current_mesh->selection_type() == SELECTION_VERTEX)
+            if (current_mesh->selection_type() == SELECTION_VERTEX)
                 current_mesh->move_selected_vertex(MOVE_VERTEX_Z_POS);
+            else if (new_face_mode)
+                new_face_xyz[2] += POINT_MOV;
             break;
         case 'f':
         case 'F':
@@ -512,12 +523,23 @@ void handle_normal_keypress(unsigned char key)
             if (new_face_mode)
                 current_mesh->render_new_face(new_face_xyz);
             break;
+        case '[':
+        case '{':
+            switch_object(SWITCH_NEXT);
+            break;
+        case ']':
+        case '}':
+            switch_object(SWITCH_PREV);
+            break;
     }
 }
 
 void handleMouse(int button, int state, int x, int y)
 {
     if (state != GLUT_DOWN)
+        return;
+
+    if (objects.at(current_mesh)->is_rotating())
         return;
 
     GLuint selectBuf[BUFSIZE];
@@ -623,6 +645,13 @@ void handleTerminal()
                     return;
                 }
 
+                for (int i = 0; i < 3; i++)
+                {
+                    translate_buff[i] = translate_buff_i[i];
+                    rotate_buff[i] = rotate_buff_i[i];
+                    scale_buff[i] = scale_buff_i[i];
+                }
+
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_CLEAR))
                     objfile_buff = tokens.at(1);
                 else
@@ -632,11 +661,18 @@ void handleTerminal()
                 }
                 break;
             case CMD_OBJ_ADD:
-                if (!(tokens.size() == 2))
+                if (!(tokens.size() == 11))
                 {
                     comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: obj-open [OBJ]";
+                    comp_buff = "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [sX] [sY] [sZ]";
                     return;
+                }
+
+                for (int i = 0; i < 3; i++)
+                {
+                    translate_buff[i] = atof(tokens[i+2].c_str());
+                    rotate_buff[i] = atof(tokens[i+5].c_str());
+                    scale_buff[i] = atof(tokens[i+8].c_str());
                 }
 
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_ADD))
@@ -844,11 +880,7 @@ bool loadOBJ(const char* s, int mode)
 
 	Mesh* mesh = new Mesh();
 
-    float trans[] = {0.0f, 0.0f, 0.0f};
-    float rot[] = {1.0f, 0.0f, 0.0f};
-    float sca[] = {1.0f, 1.0f, 1.0f};
-
-    Transform* transform = new Transform(trans, rot, sca);
+    Transform* transform = new Transform(translate_buff, rotate_buff, scale_buff);
 	
     if (!Reader::readObj(s, mesh))
         return false;
@@ -882,6 +914,9 @@ bool loadOBJ(const char* s, int mode)
 
     objects.insert(pair<Mesh*, Transform*>(mesh, transform));
     current_mesh = mesh;
+
+    for (int i = 0; i < 3; i++)
+        new_face_xyz[i] = 0;
 
     return true;
 }
@@ -1043,8 +1078,15 @@ void draw_cartesian_plane()
         float* xyz = current_mesh->get_selected_vertex_xyz();
         glTranslatef(xyz[0], xyz[1], xyz[2]);
     }
+    else if (new_face_mode)
+
+    {
+        glTranslatef(new_face_xyz[0], new_face_xyz[1], new_face_xyz[2]);
+    }
     else
+    {
         glTranslatef(0.0f, 0.0f, 0.0f);
+    }
 
     glDisable(GL_LINE_STIPPLE);
 
