@@ -21,6 +21,29 @@ Transform::Transform(float* trans, float* rot, float* sca, float ai)
     angle_inc = ai;
 }
 
+void Transform::set_translate(float* trans)
+{
+    for (int i = 0; i < 3; i++)
+        translate[i] = trans[i];
+}
+
+void Transform::set_rotate(float* rot)
+{
+    for (int i = 0; i < 3; i++)
+        rotate[i] = rot[i];
+}
+
+void Transform::set_scale(float* sca)
+{
+    for (int i = 0; i < 3; i++)
+        scale[i] = sca[i];
+}
+
+void Transform::set_angle_inc(float ai)
+{
+    angle_inc = ai;
+}
+
 float* Transform::get_translate()
 {
     return translate;

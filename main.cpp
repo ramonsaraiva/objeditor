@@ -46,6 +46,10 @@
 #define CMD_TRIANGULATE     18
 #define CMD_CREATE          19
 #define CMD_UNSELECT        21
+#define CMD_TRANSLATE       22
+#define CMD_ROTATE          23
+#define CMD_SCALE           24
+#define CMD_ANGLE_INC       25
 
 using namespace std;
 
@@ -135,6 +139,9 @@ void selection_info();
 void draw_cartesian_plane();
 void draw_new_face_point();
 
+bool check_parameters(int tokens_size, int needed, string error);
+void terminal_error(string error);
+
 int main(int argc, char** argv)
 {
     srand(time(NULL));
@@ -220,6 +227,10 @@ void init()
     terminal_cmds["triangulate"] = CMD_TRIANGULATE;
     terminal_cmds["create"] = CMD_CREATE;
     terminal_cmds["unselect"] = CMD_UNSELECT;
+    terminal_cmds["translate"] = CMD_TRANSLATE;
+    terminal_cmds["rotate"] = CMD_ROTATE;
+    terminal_cmds["scale"] = CMD_SCALE;
+    terminal_cmds["angle-inc"] = CMD_ANGLE_INC;
 
     set_mode(MODE_FACE);
 
@@ -596,8 +607,7 @@ void handleTerminal()
 
     if (!(terminal_cmds.find(tokens.front()) != terminal_cmds.end()))
     {
-        comp_color = COLOR_ERROR;
-        comp_buff = "The command \"" + tokens.front() + "\" was not found, try \"commands\" to see which is available ";
+        terminal_error("The command \"" + tokens.front() + "\" was not found, try \"commands\" to see which is available ");
         return;
     }
     else
@@ -631,12 +641,8 @@ void handleTerminal()
                 fps_enabled = false;
                 break;
             case CMD_OBJ_OPEN:
-                if (!(tokens.size() == 2))
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: obj-open [OBJ]";
+                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: obj-open [OBJ]"))
                     return;
-                }
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -650,18 +656,11 @@ void handleTerminal()
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_CLEAR))
                     current_mesh->set_name(tokens.at(1));
                 else
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Object \"" + tokens.at(1) + "\" not found";
-                }
+                    terminal_error("Object \"" + tokens.at(1) + "\" not found");
                 break;
             case CMD_OBJ_ADD:
-                if (!(tokens.size() == 10))
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]";
+                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]"))
                     return;
-                }
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -675,18 +674,12 @@ void handleTerminal()
                 if (loadOBJ((string("obj/") + tokens.at(1) + string(".obj")).c_str(), LOAD_ADD))
                     current_mesh->set_name(tokens.at(1));
                 else
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Object \"" + tokens.at(1) + "\" not found";
-                }
+                    terminal_error("Object \"" + tokens.at(1) + "\" not found");
+               
                 break;
             case CMD_MODE:
-                if (!(tokens.size() == 2))
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: mode (face|vertex)";
+                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: mode (face|vertex)"))
                     return;
-                }
 
                 if (tokens.at(1) == "face")
                     set_mode(MODE_FACE);
@@ -694,16 +687,14 @@ void handleTerminal()
                     set_mode(MODE_VERTEX);
                 else
                 {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Mode not valid. Modes available: (face|vertex)";
+                    terminal_error("Mode not valid. Modes available: (face|vertex)");
                     return;
                 }
                 break;
             case CMD_DELETE:
                 if (current_mesh->selection_type() != SELECTION_FACE)
                 {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Select something before trying to delete..";
+                    terminal_error("Select something before trying to delete..");
                     return;
                 }
 
@@ -719,17 +710,12 @@ void handleTerminal()
                 cartesian_plane_enabled = false;
                 break;
             case CMD_PLANE_SIZE:
-                if (!(tokens.size() == 2))
-                {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Wrong parameters. Usage: cplane-size [SIZE]";
+                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: cplane-size [SIZE]"))
                     return;
-                }
-                
+
                 if (atoi(tokens.at(1).c_str()) <= 0)
                 {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Cartesian plane size must be bigger than 0";
+                    terminal_error("Cartesian plane size must be bigger than 0");
                     return;
                 }
 
@@ -744,10 +730,10 @@ void handleTerminal()
             case CMD_COMPLEXIFY:
                 if (!current_mesh->complexify())
                 {
-                    comp_color = COLOR_ERROR;
-                    comp_buff = "Select a face before trying to complexify";
+                    terminal_error("Select a face before trying to complexify");
                     return;
-                } break;
+                }
+                break;
             case CMD_RAND_COMPLEXIFY:
                 current_mesh->random_complexify();
                 break;
@@ -759,6 +745,21 @@ void handleTerminal()
                 break;
             case CMD_UNSELECT:
                 current_mesh->clear_selection();
+                break;
+            case CMD_TRANSLATE:
+                if (!check_parameters(tokens.size(), 4, "translate [X] [Y] [Z]"))
+                    return;
+
+                for (int i = 0; i < 3; i++)
+                    translate_buff[i] = atof(tokens[i+1].c_str());
+
+                objects.at(current_mesh)->set_translate(translate_buff);
+                break;
+            case CMD_ROTATE:
+                break;
+            case CMD_SCALE:
+                break;
+            case CMD_ANGLE_INC:
                 break;
             default:
                 break;
@@ -1181,7 +1182,22 @@ void draw_new_face_point()
     glPushMatrix();
 
         glTranslatef(new_face_xyz[0], new_face_xyz[1], new_face_xyz[2]);
-        glutSolidSphere(0.1, 8, 8); 
+        glutSolidSphere(0.1, 8, 8);
 
     glPopMatrix();
+}
+
+bool check_parameters(int tokens_size, int needed, string error)
+{
+    if (tokens_size == needed)
+        return true;
+
+    terminal_error(error);
+    return false;
+}
+
+void terminal_error(string error)
+{
+    comp_color = COLOR_ERROR;
+    comp_buff = error;
 }

@@ -12,12 +12,17 @@ class Transform
     public:
         Transform(float* trans, float* rot, float* sca, float ai);
 
+        void set_translate(float* trans);
+        void set_rotate(float* rot);
+        void set_scale(float* sca);
+        void set_angle_inc(float ai);
+
         float* get_translate();
         float* get_rotate();
         float* get_scale();
+        float get_rotation_angle();
 
         void toggle_rotation();
         bool is_rotating();
-        float get_rotation_angle();
         void inc_rotation_angle();
 };
