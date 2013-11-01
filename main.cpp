@@ -139,7 +139,7 @@ void selection_info();
 void draw_cartesian_plane();
 void draw_new_face_point();
 
-bool check_parameters(int tokens_size, int needed, string error);
+bool check_parameters(int tokens_size, int needed, string usage);
 void terminal_error(string error);
 
 int main(int argc, char** argv)
@@ -641,7 +641,7 @@ void handleTerminal()
                 fps_enabled = false;
                 break;
             case CMD_OBJ_OPEN:
-                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: obj-open [OBJ]"))
+                if (!check_parameters(tokens.size(), 2, "obj-open [OBJ]"))
                     return;
 
                 for (int i = 0; i < 3; i++)
@@ -659,7 +659,7 @@ void handleTerminal()
                     terminal_error("Object \"" + tokens.at(1) + "\" not found");
                 break;
             case CMD_OBJ_ADD:
-                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]"))
+                if (!check_parameters(tokens.size(), 2, "obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]"))
                     return;
 
                 for (int i = 0; i < 3; i++)
@@ -678,7 +678,7 @@ void handleTerminal()
                
                 break;
             case CMD_MODE:
-                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: mode (face|vertex)"))
+                if (!check_parameters(tokens.size(), 2, "mode (face|vertex)"))
                     return;
 
                 if (tokens.at(1) == "face")
@@ -710,7 +710,7 @@ void handleTerminal()
                 cartesian_plane_enabled = false;
                 break;
             case CMD_PLANE_SIZE:
-                if (!check_parameters(tokens.size(), 2, "Wrong parameters. Usage: cplane-size [SIZE]"))
+                if (!check_parameters(tokens.size(), 2, "cplane-size [SIZE]"))
                     return;
 
                 if (atoi(tokens.at(1).c_str()) <= 0)
@@ -1187,12 +1187,12 @@ void draw_new_face_point()
     glPopMatrix();
 }
 
-bool check_parameters(int tokens_size, int needed, string error)
+bool check_parameters(int tokens_size, int needed, string usage)
 {
     if (tokens_size == needed)
         return true;
 
-    terminal_error(error);
+    terminal_error("Wrong parameters. Usage: " + usage);
     return false;
 }
 
