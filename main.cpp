@@ -659,7 +659,7 @@ void handleTerminal()
                     terminal_error("Object \"" + tokens.at(1) + "\" not found");
                 break;
             case CMD_OBJ_ADD:
-                if (!check_parameters(tokens.size(), 2, "obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]"))
+                if (!check_parameters(tokens.size(), 10, "obj-add [OBJ] [tX] [tY] [tZ] [rX] [rY] [rZ] [s] [rINC]"))
                     return;
 
                 for (int i = 0; i < 3; i++)
@@ -756,10 +756,28 @@ void handleTerminal()
                 objects.at(current_mesh)->set_translate(translate_buff);
                 break;
             case CMD_ROTATE:
+                if (!check_parameters(tokens.size(), 4, "rotate [X] [Y] [Z]"))
+                    return;
+
+                for (int i = 0; i < 3; i++)
+                    rotate_buff[i] = atof(tokens[i+1].c_str());
+
+                objects.at(current_mesh)->set_rotate(rotate_buff);
                 break;
             case CMD_SCALE:
+                if (!check_parameters(tokens.size(), 4, "scale [X] [Y] [Z]"))
+                    return;
+
+                for (int i = 0; i < 3; i++)
+                    scale_buff[i] = atof(tokens[i+1].c_str());
+
+                objects.at(current_mesh)->set_scale(scale_buff);
                 break;
             case CMD_ANGLE_INC:
+                if (!check_parameters(tokens.size(), 2, "angle-inc [INC]"))
+                    return;
+
+                objects.at(current_mesh)->set_angle_inc(atof(tokens[1].c_str()));
                 break;
             default:
                 break;
