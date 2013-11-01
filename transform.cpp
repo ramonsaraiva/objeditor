@@ -1,6 +1,6 @@
 #include "transform.h"
 
-Transform::Transform(float* trans, float* rot, float* sca)
+Transform::Transform(float* trans, float* rot, float* sca, float ai)
 {
     translate = new float[3];
     rotate = new float[3];
@@ -17,6 +17,8 @@ Transform::Transform(float* trans, float* rot, float* sca)
     scale[0] = sca[0];
     scale[1] = sca[1];
     scale[2] = sca[2];
+
+    angle_inc = ai;
 }
 
 float* Transform::get_translate()
@@ -49,7 +51,7 @@ float Transform::get_rotation_angle()
     return rotation_angle;
 }
 
-void Transform::inc_rotation_angle(float inc)
+void Transform::inc_rotation_angle()
 {
-    rotation_angle += inc;
+    rotation_angle += angle_inc;
 }
