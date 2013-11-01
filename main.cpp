@@ -6,6 +6,7 @@
 #include <utility>
 #include <algorithm>
 #include <map>
+#include <iterator>
 #include <time.h>
 
 #define BUFSIZE             512
@@ -125,6 +126,8 @@ void toggle_terminal();
 void set_mode(int mode);
 bool has_face_selected();
 bool delete_face_selected();
+
+void switch_object(int it);
 
 void selection_info();
 void draw_cartesian_plane();
@@ -1045,6 +1048,28 @@ bool delete_face_selected()
     current_mesh->get_face_selected()->face = NULL; 
     selection_buff.clear();
     return true;
+}
+
+void switch_object(int it)
+{
+    auto curr = objects.find(current_mesh);
+
+    if (it == SWITCH_NEXT)
+    {
+        if (curr == objects.end())
+            return;
+
+        curr = std::next(curr);
+        current_mesh = curr->first;
+    }
+    else
+    {
+        if (curr == objects.begin())
+            return;
+
+        curr = std::prev(curr);
+        current_mesh = curr->first;
+    }
 }
 
 void selection_info()
