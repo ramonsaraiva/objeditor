@@ -41,6 +41,7 @@
 #define CMD_RAND_COMPLEXIFY 17
 #define CMD_TRIANGULATE     18
 #define CMD_CREATE          19
+#define CMD_UNSELECT        21
 
 using namespace std;
 
@@ -127,7 +128,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(width, height);
 
     glutCreateWindow("objeditor ~ marcel & ramon");
-    //glutFullScreen();
+    glutFullScreen();
 
     glewInit();
     init();
@@ -201,6 +202,7 @@ void init()
     terminal_cmds["random-complexify"] = CMD_RAND_COMPLEXIFY;
     terminal_cmds["triangulate"] = CMD_TRIANGULATE;
     terminal_cmds["create"] = CMD_CREATE;
+    terminal_cmds["unselect"] = CMD_UNSELECT;
 
     objfile_buff = "cube.obj";
     set_mode(MODE_FACE);
@@ -214,19 +216,22 @@ void drawScene()
     
     for (auto object : objects)
     {
-        /*
-        float* trans = object.second->get_translate();
         float* rot = object.second->get_rotate();
+        float* trans = object.second->get_translate();
         float* sca = object.second->get_scale();
-        */
 
         glPushMatrix();
 
-        /*
-        glScalef(sca[0], sca[1], sca[2]);
-        glRotatef(90, rot[0], rot[1], rot[2]);
+        glRotatef(object.second->get_rotation_angle(), rot[0], rot[1], rot[2]);
         glTranslatef(trans[0], trans[1], trans[2]);
-        */
+        glScalef(sca[0], sca[1], sca[2]);
+
+        if (object.second->is_rotating())
+        {
+            glRotatef(object.second->get_rotation_angle(), 1.0f, 1.0f, 0.0f);
+            glTranslatef(0.0f, 0.0f, 0.0f);
+            object.second->inc_rotation_angle(0.5);
+        }
 
         if (render_mode == RENDER_NORMAL)
             object.first->render(GL_RENDER, glMode);
@@ -497,8 +502,7 @@ void handle_normal_keypress(unsigned char key)
             break;
         case 'o':
         case 'O':
-            camera->moveSide(-1);
-            camera->changeAngle(-3.5);
+            objects.at(current_mesh)->toggle_rotation();
             break;
         case 'q':
         case 'Q':
@@ -525,6 +529,11 @@ void handleMouse(int button, int state, int x, int y)
     {
         if (hits != 0)
             processHits(hits,selectBuf);
+        else
+        {
+            if (current_mesh->selection_type() != SELECTION_NONE)
+                current_mesh->clear_selection();
+        }
     }
     
 	glutPostRedisplay();
@@ -713,6 +722,9 @@ void handleTerminal()
             case CMD_CREATE:
                 new_face_mode = true;
                 break;
+            case CMD_UNSELECT:
+                current_mesh->clear_selection();
+                break;
             default:
                 break;
         }
@@ -833,7 +845,7 @@ bool loadOBJ(const char* s, int mode)
 	Mesh* mesh = new Mesh();
 
     float trans[] = {0.0f, 0.0f, 0.0f};
-    float rot[] = {0.0f, 0.0f, 0.0f};
+    float rot[] = {1.0f, 0.0f, 0.0f};
     float sca[] = {1.0f, 1.0f, 1.0f};
 
     Transform* transform = new Transform(trans, rot, sca);
