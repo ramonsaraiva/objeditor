@@ -3,13 +3,12 @@
 
 #define PI 3.141592653589
 
-#define SPEED 0.3 
-
 class Camera
 {
 	private:
 		float angle;
 		void refreshDirection(void);
+        float speed = 0.3;
 
 	public:
 		float* i;
@@ -18,7 +17,6 @@ class Camera
 		Camera();
 		Camera(float init_angle);
         
-
 		float getSin(void);
 		float getCos(void);
         float* get_xyz();
@@ -28,6 +26,7 @@ class Camera
 		void setEye(int x, int y, int z);
 		void move(int direction);
 		void moveSide(int direction);
+        void set_speed(float s);
 
 		void refreshLookAt();
 		void resetView(int width, int height);

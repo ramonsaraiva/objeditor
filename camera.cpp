@@ -56,19 +56,24 @@ void Camera::setDirectionY(float y){
 }
 
 void Camera::move(int direction){// direction = 1 to front, direction = -1 to backwards
-	i[0] += SPEED * direction * getCos();
-	i[1] += SPEED * direction * d[1];
-	i[2] += SPEED * direction * getSin();
+	i[0] += speed * direction * getCos();
+	i[1] += speed * direction * d[1];
+	i[2] += speed * direction * getSin();
 	refreshDirection();
 	refreshLookAt();
 }
 
 void Camera::moveSide(int direction){// direction = -1 to right, direction = 1 to left
 	float auxAngle = angle / 180 * PI - (PI / 2);
-	i[0] += SPEED * cos(auxAngle) * direction;
-	i[2] += SPEED * sin(auxAngle) * direction;
+	i[0] += speed * cos(auxAngle) * direction;
+	i[2] += speed * sin(auxAngle) * direction;
 	refreshDirection();
 	refreshLookAt();
+}
+
+void Camera::set_speed(float s)
+{
+    speed = s;
 }
 
 float Camera::getSin(){

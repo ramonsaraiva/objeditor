@@ -50,6 +50,7 @@
 #define CMD_ROTATE          23
 #define CMD_SCALE           24
 #define CMD_ANGLE_INC       25
+#define CMD_CAMERA_SPEED    26
 
 using namespace std;
 
@@ -231,6 +232,7 @@ void init()
     terminal_cmds["rotate"] = CMD_ROTATE;
     terminal_cmds["scale"] = CMD_SCALE;
     terminal_cmds["angle-inc"] = CMD_ANGLE_INC;
+    terminal_cmds["camera-speed"] = CMD_CAMERA_SPEED;
 
     set_mode(MODE_FACE);
 
@@ -675,7 +677,6 @@ void handleTerminal()
                     current_mesh->set_name(tokens.at(1));
                 else
                     terminal_error("Object \"" + tokens.at(1) + "\" not found");
-               
                 break;
             case CMD_MODE:
                 if (!check_parameters(tokens.size(), 2, "mode (face|vertex)"))
@@ -778,6 +779,12 @@ void handleTerminal()
                     return;
 
                 objects.at(current_mesh)->set_angle_inc(atof(tokens[1].c_str()));
+                break;
+            case CMD_CAMERA_SPEED:
+                if (!check_parameters(tokens.size(), 2, "camera-speed [SPEED]"))
+                    return;
+                
+                camera->set_speed(atof(tokens[1].c_str()));
                 break;
             default:
                 break;
