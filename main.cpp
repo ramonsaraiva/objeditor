@@ -51,6 +51,7 @@
 #define CMD_SCALE           24
 #define CMD_ANGLE_INC       25
 #define CMD_CAMERA_SPEED    26
+#define CMD_RANDOM_ADD		27
 
 using namespace std;
 
@@ -233,6 +234,7 @@ void init()
     terminal_cmds["scale"] = CMD_SCALE;
     terminal_cmds["angle-inc"] = CMD_ANGLE_INC;
     terminal_cmds["camera-speed"] = CMD_CAMERA_SPEED;
+	terminal_cmds["random-add"] = CMD_RANDOM_ADD;
 
     set_mode(MODE_FACE);
 
@@ -783,9 +785,21 @@ void handleTerminal()
             case CMD_CAMERA_SPEED:
                 if (!check_parameters(tokens.size(), 2, "camera-speed [SPEED]"))
                     return;
-                
+
                 camera->set_speed(atof(tokens[1].c_str()));
                 break;
+			case CMD_RANDOM_ADD:
+                for (int i = 0; i < 3; i++)
+                {
+                    translate_buff[i] = 0.0f;
+					rotate_buff[i] = 0.0f;
+                    scale_buff[i] = 1.0f; 
+                }
+
+				rotate_buff[1] = 1.0f;
+                ai_buff = 1.0f;
+
+				break;
             default:
                 break;
         }
