@@ -328,6 +328,7 @@ bool Mesh::complexify()
            xyz[i] += verts[v].getCoords()[i] / face_selected.face->getVerts().size();
 
    Vertex centroid = Vertex(xyz);
+   centroid.set_deletable(true);
 
    addVerts(centroid);
 
@@ -401,6 +402,7 @@ void Mesh::triangulate()
 
 void Mesh::render_new_face(float* xyz) {
     Vertex new_vertex = Vertex(xyz);
+	new_vertex.set_deletable(true);
     unsigned int vertex_pos_first = 0;
     unsigned int vertex_pos_second;
 
@@ -468,6 +470,27 @@ void Mesh::move_selected_vertex(int side)
             verts[vertex_selected].getCoords()[2] -= VERTEX_MOV;
             break;
     }
+}
+
+void Mesh::delete_selected_vertex()
+{
+	if (!verts[vertex_selected].is_deletable())
+		return;
+
+	for (int i = 0; i < groups.size(); i++)
+	{
+		Group* g = groups[i];
+
+		for (int j = g->getFaces().size() - 1; j >= 0; j--)
+		{
+			Face* f = g->getFaces()[j];
+
+			if (f->has_vertex(vertex_selected))
+				g->eraseFaceAt(j);
+		}
+	}
+
+	verts.erase(verts.begin() + vertex_selected);
 }
 
 void Mesh::mess()

@@ -15,3 +15,13 @@ Vertex::Vertex(float x, float y, float z){
 float* Vertex::getCoords(void){
 	return coords;
 }
+
+bool Vertex::is_deletable()
+{
+	return deletable;
+}
+
+void Vertex::set_deletable(bool b)
+{
+	deletable = b;
+}

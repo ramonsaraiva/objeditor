@@ -493,6 +493,8 @@ void handle_normal_keypress(unsigned char key)
         case 'x':
             if (current_mesh->selection_type() == SELECTION_FACE)
                 current_mesh->delete_selected_face();
+			else if (current_mesh->selection_type() == SELECTION_VERTEX)
+				current_mesh->delete_selected_vertex();
             break;
         case 'z':
             break;

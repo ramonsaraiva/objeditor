@@ -77,6 +77,7 @@ class Mesh{
         void triangulate();
         void render_new_face(float* xyz);
         void move_selected_vertex(int side);
+		void delete_selected_vertex();
 
         void mess();
         int rand_lim(int limit);
