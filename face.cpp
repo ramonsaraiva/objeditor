@@ -12,11 +12,10 @@ void Face::addText(int t){
 	texts.push_back(t);
 }
 
-
 bool Face::has_vertex(int v)
 {
 	bool has = false;
-
+	
 	for (int i = verts.size() - 1; i >= 0; i--)
 	{
 		if (verts[i] > v)

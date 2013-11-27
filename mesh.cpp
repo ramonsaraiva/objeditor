@@ -476,6 +476,9 @@ void Mesh::delete_selected_vertex()
 {
 	if (!verts[vertex_selected].is_deletable())
 		return;
+	
+	vector<int> new_face_vertex;
+	vector<Face*> deleted_faces;
 
 	for (int i = 0; i < groups.size(); i++)
 	{
@@ -485,12 +488,67 @@ void Mesh::delete_selected_vertex()
 		{
 			Face* f = g->getFaces()[j];
 
-			if (f->has_vertex(vertex_selected))
+			if (f->has_vertex(vertex_selected)){
 				g->eraseFaceAt(j);
+				deleted_faces.push_back(f);
+			}
 		}
 	}
 
 	verts.erase(verts.begin() + vertex_selected);
+	
+	// map<int, bool> a;
+	bool initialized = false;
+	for(int x = 0; x <  deleted_faces.size(); ++x){
+		Face* f = deleted_faces[x];
+		vector<int> v=f->getVerts();
+		vector<int>::iterator it0 = find(new_face_vertex.begin(), new_face_vertex.end(), v[0]);
+		vector<int>::iterator it1 = find(new_face_vertex.begin(), new_face_vertex.end(), v[1]);
+		if(it0 == new_face_vertex.end()){
+			if(it1 == new_face_vertex.end()){
+				if(!initialized){
+					initialized = true;
+					new_face_vertex.push_back(v[0]);
+					// a[v[0]] = true;
+					new_face_vertex.push_back(v[1]);
+					cout<<"v[0]: "<<v[0]<<endl;
+					cout<<"v[1]: "<<v[1]<<endl;
+				}else{
+					deleted_faces.erase(deleted_faces.begin() + x);
+					--x;
+					deleted_faces.push_back(f);
+				}
+			}else{
+				// if(!a[v[1]]){
+				if(it1 != new_face_vertex.begin()){
+					// a[v[1]] = true;
+					++it1;
+				}
+				new_face_vertex.insert(it1, v[0]);
+				cout<<"v[1]->v[0]: "<<v[1]<<" -> "<<v[0]<<endl;
+			}
+		}else{
+				if(it0 != new_face_vertex.begin()){
+				// if(!a[v[0]]){
+					// a[v[0]] = true;
+					++it0;
+				}
+			if(it1 == new_face_vertex.end()){
+				new_face_vertex.insert(it0, v[1]);
+				cout<<"v[0]->v[1]: "<<v[0]<<" -> "<<v[1]<<endl;
+			}
+		}
+	}
+	
+	
+	Face* new_face = new Face();
+	cout<<"vertexes"<<endl;
+	for(int t : new_face_vertex){
+		new_face->addVert(t);
+		cout<<t<<endl;
+	}
+		
+	groups.back()->addFace(new_face);
 }
 
 void Mesh::mess()
