@@ -480,11 +480,11 @@ void Mesh::delete_selected_vertex()
 	vector<int> new_face_vertex;
 	vector<Face*> deleted_faces;
 
-	for (int i = 0; i < groups.size(); i++)
+	for (unsigned int i = 0; i < groups.size(); i++)
 	{
 		Group* g = groups[i];
 
-		for (int j = g->getFaces().size() - 1; j >= 0; j--)
+		for (unsigned int j = g->getFaces().size() - 1; j >= 0; j--)
 		{
 			Face* f = g->getFaces()[j];
 
@@ -499,7 +499,7 @@ void Mesh::delete_selected_vertex()
 	
 	// map<int, bool> a;
 	bool initialized = false;
-	for(int x = 0; x <  deleted_faces.size(); ++x){
+	for(unsigned int x = 0; x <  deleted_faces.size(); ++x){
 		Face* f = deleted_faces[x];
 		vector<int> v=f->getVerts();
 		vector<int>::iterator it0 = find(new_face_vertex.begin(), new_face_vertex.end(), v[0]);

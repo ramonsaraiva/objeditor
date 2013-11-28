@@ -52,6 +52,7 @@
 #define CMD_ANGLE_INC       25
 #define CMD_CAMERA_SPEED    26
 #define CMD_RANDOM_ADD		27
+#define CMD_SAVE			28
 
 using namespace std;
 
@@ -235,6 +236,7 @@ void init()
     terminal_cmds["angle-inc"] = CMD_ANGLE_INC;
     terminal_cmds["camera-speed"] = CMD_CAMERA_SPEED;
 	terminal_cmds["random-add"] = CMD_RANDOM_ADD;
+	terminal_cmds["save"] = CMD_SAVE;
 
     set_mode(MODE_FACE);
 
@@ -802,6 +804,11 @@ void handleTerminal()
                 ai_buff = 1.0f;
 
 				break;
+			case CMD_SAVE:
+				if (!check_parameters(tokens.size(), 2, "save [FILENAME]"))
+					return
+
+				Reader::saveObj(tokens[1].c_str(), current_mesh);
             default:
                 break;
         }

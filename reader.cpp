@@ -203,6 +203,16 @@ bool Reader::readMtl(const char* s, Mesh* m){
 	return true;
 }
 
+void Reader::saveObj(const char* name, Mesh* mesh)
+{
+	ofstream out;
+	out.open(name);
+
+	out << "a";
+
+	out.close();
+}
+
 Image* Reader::readPpm(string s){
 	Image* img = new Image();
 	img->loadPPM(s.c_str());
