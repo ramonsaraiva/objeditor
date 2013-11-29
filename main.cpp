@@ -806,9 +806,10 @@ void handleTerminal()
 				break;
 			case CMD_SAVE:
 				if (!check_parameters(tokens.size(), 2, "save [FILENAME]"))
-					return
+					return;
 
-				Reader::saveObj(tokens[1].c_str(), current_mesh);
+				Reader::saveObj((string("obj/") + tokens[1] + string(".obj")).c_str(), current_mesh);
+
             default:
                 break;
         }

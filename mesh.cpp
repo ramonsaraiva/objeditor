@@ -5,6 +5,11 @@ void Mesh::set_name(string n)
     name = n;
 }
 
+void Mesh::set_mtl_file(string file)
+{
+	mtl_file = file;
+}
+
 void Mesh::addGroup(Group* newGroup){
 	groups.push_back(newGroup);
 }
@@ -46,6 +51,11 @@ void Mesh::set_vertex_selected(int vertex)
 string Mesh::get_name()
 {
     return name;
+}
+
+string Mesh::get_mtl_file()
+{
+	return mtl_file;
 }
 
 vector<Group*> Mesh::getGroups(void){

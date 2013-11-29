@@ -35,6 +35,7 @@ class Mesh{
 
 	private:
         string name;
+		string mtl_file;
 		vector<Group*> groups;
 		vector<Vertex> verts;
 		vector<Vertex> norms;
@@ -55,6 +56,7 @@ class Mesh{
 
 	public:
         void set_name(string n);
+		void set_mtl_file(string file);
 		void addGroup(Group* newGroup);
 		void addVerts(Vertex newV);
 		void addNorms(Vertex newN);
@@ -84,6 +86,7 @@ class Mesh{
         float distance_bet(Vertex v1, Vertex v2);
 
         string get_name();
+		string get_mtl_file();
 		Group* getGroupAt(int i);
 		vector<Group*> getGroups(void);
 		vector<Vertex> getVerts(void);
