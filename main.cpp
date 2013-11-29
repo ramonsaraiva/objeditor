@@ -236,7 +236,7 @@ void init()
     terminal_cmds["angle-inc"] = CMD_ANGLE_INC;
     terminal_cmds["camera-speed"] = CMD_CAMERA_SPEED;
 	terminal_cmds["random-add"] = CMD_RANDOM_ADD;
-	terminal_cmds["save"] = CMD_SAVE;
+	terminal_cmds["obj-save"] = CMD_SAVE;
 
     set_mode(MODE_FACE);
 
